@@ -2,17 +2,11 @@ package com.example.mdp_android;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Maze extends ViewGroup {
     private int _xIndex;
@@ -20,6 +14,12 @@ public class Maze extends ViewGroup {
     private ArrayList<MazeTile> _tileList;
     public static int TILESIZE;
 
+    /**
+     * Constructor for maze. Creates x * y number of tiles and stores in arrayList '_tileList'
+     * @param context
+     * @param xIndex
+     * @param yIndex
+     */
     public Maze(Context context, int xIndex, int yIndex) {
         super(context);
         _xIndex = xIndex;
@@ -38,31 +38,12 @@ public class Maze extends ViewGroup {
                 this.addView(mazeTile, params);
                 _tileList.add(mazeTile);
 
-                mazeTile.setOnClickListener(tileListener);
+                mazeTile.setOnClickListener(tileListener); // for testing only
             }
         }
     }
 
-    /**
-     * Position all children within this layout.
-     */
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        for(int i=0; i < _tileList.size(); i++){
-            int xPos = Math.round(i%_xIndex) * TILESIZE;
-            int yPos = Math.round(i/_yIndex) * TILESIZE;
-            _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);
-        }
-    }
-
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
-    }
-
+    //click listener for testing, to change in the future
     private View.OnClickListener tileListener = new View.OnClickListener ()
     {
         public void onClick(View v)
@@ -74,4 +55,25 @@ public class Maze extends ViewGroup {
             // more for other UI buttons
         }
     };
+
+    /**
+     * Required Android function, dont change this
+     */
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        for(int i=0; i < _tileList.size(); i++){
+            int xPos = Math.round(i%_xIndex) * TILESIZE;
+            int yPos = Math.round(i/_yIndex) * TILESIZE;
+            _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);
+        }
+    }
+
+    //Utility functions
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
 }

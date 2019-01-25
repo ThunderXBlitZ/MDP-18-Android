@@ -4,19 +4,21 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <!-- Maze container -->
     <RelativeLayout android:layout_width="match_parent"
         android:id="@+id/mazeLayout"
-        android:layout_height="320dp"
+        android:layout_height="@dimen/maze_length"
         android:orientation="vertical"
         android:background="#192832"></RelativeLayout>
 
+    <!-- Bot status bar -->
     <RelativeLayout android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#FFFFFF"></RelativeLayout>
 
+    <!-- Button container -->
     <RelativeLayout android:layout_width="match_parent"
         android:layout_height="320dp"
         android:background="#193222"></RelativeLayout>
-
 
 </LinearLayout>

@@ -11,16 +11,23 @@ import android.view.View;
 import java.util.Random;
 
 public class MazeTile extends View {
-
-    private int _state = 0;
+    private int _state = 0; // controls tile's appearance
 
     public MazeTile(Context context){
         super(context);
+
+        // just using random colours for now, to change in the future
         Paint paint = new Paint();
         Random rnd = new Random();
         paint.setARGB(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
     }
 
+    /**
+     * Required Android function.
+     * Draws the tile everytime Android system does a re-render
+     * To include in future: different colours/images for different states
+     * @param canvas
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         if(_state == 0) {
@@ -39,6 +46,9 @@ public class MazeTile extends View {
         }
     }
 
+    /**
+     * Callback for click listener. For testing only, to change in the future.
+     */
     public void clicked(){
         //change state
         _state = 1;
