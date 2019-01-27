@@ -19,6 +19,21 @@
     <!-- Button container -->
     <RelativeLayout android:layout_width="match_parent"
         android:layout_height="320dp"
-        android:background="#193222"></RelativeLayout>
+        android:background="#FFFFFF">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="List Bluetooth devices"
+            android:onClick="listBluetoothDevices"
+            android:id="@+id/bt_list_devices" />
+
+        <ListView
+            android:color="#000000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/listView" />
+
+    </RelativeLayout>
 
 </LinearLayout>
