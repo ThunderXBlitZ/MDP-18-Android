@@ -26,13 +26,42 @@
             android:layout_height="wrap_content"
             android:text="List Bluetooth devices"
             android:onClick="listBluetoothDevices"
-            android:id="@+id/bt_list_devices" />
+            android:id="@+id/bt_discovery_btn" />
+
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="BT Status"
+            android:id="@+id/bt_status_text"
+            android:layout_toRightOf="@id/bt_discovery_btn"
+        />
+
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="Disconnect"
+            android:onClick="disconnectBT"
+            android:id="@+id/bt_disconnect_btn"
+            android:layout_below="@id/bt_status_text"
+            android:layout_toRightOf="@id/bt_discovery_btn"
+            />
+
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:text="Send"
+            android:onClick="sendBTMsg"
+            android:id="@+id/send_btn"
+            android:layout_below="@id/bt_disconnect_btn"
+            android:layout_toRightOf="@id/bt_discovery_btn"
+            />
 
         <ListView
             android:color="#000000"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/listView" />
+            android:layout_height="300dp"
+            android:id="@+id/listView"
+            android:layout_below="@id/bt_discovery_btn"/>
 
     </RelativeLayout>
 

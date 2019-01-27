@@ -11,7 +11,7 @@ public class DeviceDetails {
     private boolean connected;
 
     public String getDeviceName() {
-        return deviceName;
+        return deviceName != null? deviceName : "Unknown Device";
     }
 
     public boolean getConnected() {
