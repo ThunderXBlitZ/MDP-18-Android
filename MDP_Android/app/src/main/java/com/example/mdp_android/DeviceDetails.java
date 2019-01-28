@@ -33,6 +33,6 @@ public class DeviceDetails {
     }
 
     public String toString(){
-        return deviceName == null? "null" : deviceName;
+        return deviceName == null? "Unknown Device" : deviceName;
     }
 }
