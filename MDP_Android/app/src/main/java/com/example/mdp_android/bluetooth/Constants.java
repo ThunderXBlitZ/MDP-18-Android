@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package com.example.mdp_android;
+package com.example.mdp_android.bluetooth;
+
+import com.example.mdp_android.bluetooth.BluetoothChatService;
+
 /**
  * Defines several constants used between {@link BluetoothChatService} and the UI.
  */
@@ -25,10 +28,12 @@ public interface Constants {
     int MESSAGE_READ = 2;
     int MESSAGE_WRITE = 3;
     int MESSAGE_DEVICE_NAME = 4;
-    int MESSAGE_TOAST = 5;
+    int MESSAGE_DEVICE_ADDRESS = 5;
+    int MESSAGE_TOAST = 6;
 
     // Key names received from the BluetoothChatService Handler
     String DEVICE_NAME = "device_name";
+    String DEVICE_ADDRESS = "device_address";
     String TOAST = "toast";
 
     String PREF_NAME  = "custom_write_text";

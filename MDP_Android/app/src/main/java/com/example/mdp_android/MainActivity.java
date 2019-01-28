@@ -1,126 +1,42 @@
 package com.example.mdp_android;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mdp_android.bluetooth.BluetoothChatService;
+import com.example.mdp_android.bluetooth.BluetoothFragment;
+import com.example.mdp_android.bluetooth.BluetoothManager;
+import com.example.mdp_android.bluetooth.Constants;
+import com.example.mdp_android.bluetooth.DeviceDetails;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-
-    private ArrayList<DeviceDetails> deviceItemList;
-    private ArrayAdapter<DeviceDetails> mAdapter;
-    private BluetoothChatService mChatService;
-
-    public void sendBTMsg(View v){
-        if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
-            mChatService.write("Hello World".getBytes());
-        } else {
-            Toast.makeText(this, "Unable to write", Toast.LENGTH_SHORT);
-        }
-    }
-
-    public void disconnectBT(View v){
-        if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED) {
-            mChatService.stop();
-        } else {
-            Toast.makeText(this, "Unable to disconnect", Toast.LENGTH_SHORT);
-        }
-    }
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                Toast.makeText(getApplicationContext(), "Discovery started", Toast.LENGTH_SHORT).show();
-                mAdapter.clear();
-            }
-            else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                DeviceDetails newDevice = new DeviceDetails(device.getName(), device.getAddress(), "false");
-                mAdapter.add(newDevice);
-                mAdapter.notifyDataSetChanged();
-                Log.d("DEVICELIST", "Bluetooth device found: "+newDevice.getDeviceName());
-
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                Toast.makeText(context, "Scan finished!", Toast.LENGTH_SHORT).show();
-                unregisterReceiver(mReceiver);
-            } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-                        BluetoothAdapter.ERROR);
-                switch (state) {
-                    case BluetoothAdapter.STATE_OFF:
-                        mChatService.stop();
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        mChatService.stop();
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        setupBluetooth();
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        // do nothing
-                        break;
-                }
-            }
-        }
-    };
-
-    public static Boolean isBluetoothAvailable(){
-        return _mBluetoothAdapter != null && _mBluetoothAdapter.isEnabled();
-    }
+    private BluetoothManager mBluetoothMgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupMaze(10,10);
-        setupBluetooth();
-
-        mAdapter = new ArrayAdapter<DeviceDetails>(this, android.R.layout.simple_list_item_1);
-        ListView lv = (ListView)findViewById(R.id.listView);
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (setupBluetooth() && _mBluetoothAdapter.isDiscovering()){
-                    _mBluetoothAdapter.cancelDiscovery();
-                    unregisterReceiver(mReceiver);
-                }
-                connectDevice(mAdapter.getItem(position).getAddress(), true);
-            }
-        });
-        lv.setAdapter(mAdapter);
+        mBluetoothMgr = new BluetoothManager(this, mHandler);
+        mBluetoothMgr.setupBluetooth();
     }
 
-    /**
-     * Establish connection with other device
-     *
-     * @param secure Socket Security type - Secure (true) , Insecure (false)
-     */
-    private void connectDevice(String address, boolean secure) {
-        if(setupBluetooth()) {
-            BluetoothDevice device = _mBluetoothAdapter.getRemoteDevice(address);
-            // Attempt to connect to the device
-            mChatService.connect(device, secure);
-        }
-    }
     /**
      * Creates 'maze' container viewgroup and initalizes it with x * y number of tiles
      * @param numTileWidth number of tiles in breadth of maze
@@ -132,40 +48,52 @@ public class MainActivity extends AppCompatActivity {
         mazeLayout.addView(maze);
     }
 
-    public final int BT_REQUEST_CODE = 0;
-    private static final BluetoothAdapter _mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-    private void BluetoothToastPrompt(){
-        Toast.makeText(getApplicationContext(), "Please enable Bluetooth and try again!",Toast.LENGTH_SHORT).show();
+    // Bluetooth functions
+    // to make this a non-layout function, so we can accept Strings as params
+    public void sendMessage(View v){
+        String msg = "Hello World";
+        mBluetoothMgr.sendMessage(msg);
     }
 
-    private Boolean setupBluetooth(){
-        if (_mBluetoothAdapter == null) {
-            Toast.makeText(getApplicationContext(), "Bluetooth not supported on this device!",Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        else{
-            if(!_mBluetoothAdapter.isEnabled()){
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, BT_REQUEST_CODE);
-                return false;
-                }
-                else {
-                // start BluetoothChatService since Bluetooth is enabled
-                if(mChatService == null){
-                    mChatService = new BluetoothChatService(MainActivity.this, readHandler);
-                    Toast.makeText(this, "started BT service", Toast.LENGTH_SHORT);
-                } else {
-                    if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-                        mChatService.start();
-                        Toast.makeText(this, "started BT service", Toast.LENGTH_SHORT);
-                    }
-                }
-                return true;
-            }
-        }
+    // bluetooth functions
+    private void showBluetoothFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        BluetoothFragment bluetoothDialogFragment = BluetoothFragment.newInstance("Bluetooth Menu");
+        bluetoothDialogFragment.show(fm, "bluetooth_fragment");
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.bluetooth_menu) {
+            showBluetoothFragment();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
+        mBluetoothMgr.stop();
+    }
+
+
+    // not a requirement, but we can add autoconnect once bluetooth switched on
     /**
      * Android function for handling results of any subprocess/activities/intents
      * @param requestCode
@@ -175,75 +103,81 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
-        if (requestCode == BT_REQUEST_CODE) {
+        if (requestCode == BluetoothManager.BT_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Toast.makeText(getApplicationContext(), "Bluetooth turned on!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Bluetooth turned on! Attempting auto-connect...",Toast.LENGTH_SHORT).show();
             } else {
-                BluetoothToastPrompt();
-                }
-        }
-    }
-
-    public void listBluetoothDevices(View v){
-        if(setupBluetooth()){
-            Toast.makeText(getApplicationContext(), "Button clicked & BT on",Toast.LENGTH_SHORT).show();
-
-            // Register for broadcasts when a device is discovered.
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(BluetoothDevice.ACTION_FOUND);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-            registerReceiver(mReceiver, filter);
-
-            if (_mBluetoothAdapter.isDiscovering()){
-                _mBluetoothAdapter.cancelDiscovery();
-                unregisterReceiver(mReceiver);
+                Toast.makeText(getApplicationContext(), "Please enable Bluetooth and try again!",Toast.LENGTH_SHORT).show();
             }
-            _mBluetoothAdapter.startDiscovery();
         }
-    }
-
-    public void setStatus(String msg){
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(mReceiver);
     }
 
     /**
-     * The Handler that gets information back from the BluetoothChatService
+     * Receiver for broadcast events from the system, mostly bluetooth related
      */
-    private final Handler readHandler = new Handler() {
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR);
+                switch (state) {
+                    case BluetoothAdapter.STATE_OFF:
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        mBluetoothMgr.stop();
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        mBluetoothMgr.setupBluetooth();
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        // do nothing
+                        break;
+                }
+            }
+        }
+    };
+
+    /**
+     * The Handler that gets information back from the BluetoothChatService
+     * and updates MainActivity/BluetoothFragment
+     */
+    private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            BluetoothFragment mFrag = BluetoothFragment.getInstance();
+            if(mFrag != null) mFrag.refreshList();
             switch (msg.what) {
                 case Constants.MESSAGE_STATE_CHANGE:
                     TextView textView = findViewById(R.id.bt_status_text
                     );
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
-                            //Toast.makeText(MainActivity.this, "connected to device", Toast.LENGTH_SHORT).show();
-                            textView.setText("connected to device");
+                            String tmp = "Connected to: "+mBluetoothMgr.getDeviceName();
+                            textView.setText(tmp);
+                            Toast.makeText(MainActivity.this, tmp, Toast.LENGTH_SHORT).show();
+                            if(mFrag != null){ mFrag.updateUI(Constants.MESSAGE_STATE_CHANGE, tmp);}
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
-                            //Toast.makeText(MainActivity.this, "connecting to device", Toast.LENGTH_SHORT).show();
-                            textView.setText("connecting to device");
+                            textView.setText("Connecting...");
+                            if(mFrag != null){ mFrag.updateUI(Constants.MESSAGE_STATE_CHANGE, "Connecting...");}
                             break;
-                        case BluetoothChatService.STATE_LISTEN:
+                        case BluetoothChatService.STATE_LOST:
+                            if(mFrag != null){ mFrag.updateUI(Constants.MESSAGE_STATE_CHANGE, "Disconnected");}
+                            Toast.makeText(MainActivity.this, "Connection Lost!", Toast.LENGTH_SHORT).show();
+                            break;
+                        //case BluetoothChatService.STATE_LISTEN:
                         case BluetoothChatService.STATE_NONE:
-                            textView.setText("not connected");
-                            //Toast.makeText(MainActivity.this, "not connected", Toast.LENGTH_SHORT).show();
+                            if(mFrag != null){ mFrag.updateUI(Constants.MESSAGE_STATE_CHANGE, "Not Connected");}
+                            textView.setText("Not Connected");
                             break;
+
                     }
                     break;
                 case Constants.MESSAGE_WRITE:
+                    //dont do anything
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
-                    Toast.makeText(MainActivity.this, "write: "+writeMessage, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
@@ -251,12 +185,17 @@ public class MainActivity extends AppCompatActivity {
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Toast.makeText(MainActivity.this, "read: "+readMessage, Toast.LENGTH_SHORT).show();
                     break;
+                /*
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     String mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
-                        Toast.makeText(MainActivity.this, "Connected to "
-                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                    String mConnectedAddr = msg.getData().getString(Constants.DEVICE_ADDRESS);
+                    // display in fragment if any
+                    if(mFrag != null){
+                        mFrag.updateUI(Constants.MESSAGE_DEVICE_ADDRESS, mConnectedAddr);
+                    }
                     break;
+                */
                 case Constants.MESSAGE_TOAST:
                         Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST),
                                 Toast.LENGTH_SHORT).show();
@@ -264,4 +203,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+    //end of class
 }

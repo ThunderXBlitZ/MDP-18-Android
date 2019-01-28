@@ -24,7 +24,7 @@ public class Maze extends ViewGroup {
         super(context);
         _xIndex = xIndex;
         _yIndex = yIndex;
-        TILESIZE = getScreenWidth()/_xIndex;
+        TILESIZE = Util.getScreenWidth()/_xIndex;
 
         _tileList = new ArrayList<MazeTile>(_xIndex*_yIndex);
 
@@ -66,14 +66,5 @@ public class Maze extends ViewGroup {
             int yPos = Math.round(i/_yIndex) * TILESIZE;
             _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);
         }
-    }
-
-    //Utility functions
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 }
