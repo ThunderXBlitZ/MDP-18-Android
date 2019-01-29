@@ -18,10 +18,10 @@
         android:layout_below="@id/toolbar"
         android:id="@+id/bluetooth_layout"
         android:paddingTop="24dp"
-        android:paddingBottom="8dp"
         android:paddingRight="24dp"
         android:paddingLeft="24dp"
-        android:layout_width="fill_parent" android:layout_height="fill_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:layout_gravity="center" android:orientation="vertical"  >
 
     <TextView
@@ -39,6 +39,7 @@
             android:background="#CCCCCC"/>
 
     <ListView
+        android:scrollbars="none"
         android:paddingTop="8dp"
         android:color="#000000"
         android:layout_width="wrap_content"

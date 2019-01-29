@@ -5,11 +5,13 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,7 +35,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setupMaze(10,10);
+
         mBluetoothMgr = new BluetoothManager(this, mHandler);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(mReceiver, filter);
         mBluetoothMgr.setupBluetooth();
     }
 
@@ -49,67 +55,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Bluetooth functions
-    // to make this a non-layout function, so we can accept Strings as params
+    // TBD: make this a non-layout function, so we can accept Strings as params
     public void sendMessage(View v){
         String msg = "Hello World";
         mBluetoothMgr.sendMessage(msg);
-    }
-
-    // bluetooth functions
-    private void showBluetoothFragment() {
-        FragmentManager fm = getSupportFragmentManager();
-        BluetoothFragment bluetoothDialogFragment = BluetoothFragment.newInstance("Bluetooth Menu");
-        bluetoothDialogFragment.show(fm, "bluetooth_fragment");
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.bluetooth_menu) {
-            showBluetoothFragment();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(mReceiver);
-        mBluetoothMgr.stop();
-    }
-
-
-    // not a requirement, but we can add autoconnect once bluetooth switched on
-    /**
-     * Android function for handling results of any subprocess/activities/intents
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check which request we're responding to
-        if (requestCode == BluetoothManager.BT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(getApplicationContext(), "Bluetooth turned on! Attempting auto-connect...",Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getApplicationContext(), "Please enable Bluetooth and try again!",Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     /**
@@ -121,13 +70,23 @@ public class MainActivity extends AppCompatActivity {
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
                         BluetoothAdapter.ERROR);
+                BluetoothFragment mFrag = BluetoothFragment.getInstance();
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
-                    case BluetoothAdapter.STATE_TURNING_OFF:
                         mBluetoothMgr.stop();
+                        if(mFrag != null){
+                            mFrag.updateUI(-1, null);
+                        }
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                        // do nothing
                         break;
                     case BluetoothAdapter.STATE_ON:
-                        mBluetoothMgr.setupBluetooth();
+                            String[] deviceRecord = mBluetoothMgr.retrieveDeviceRecord();
+                            if(deviceRecord[0] != null && deviceRecord[1] != null){
+                                mBluetoothMgr.connectDevice(deviceRecord[1], true);
+                                Toast.makeText(getApplicationContext(), "Bluetooth turned on! Auto-connecting...",Toast.LENGTH_SHORT).show();
+                        }
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
                         // do nothing
@@ -145,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             BluetoothFragment mFrag = BluetoothFragment.getInstance();
-            if(mFrag != null) mFrag.refreshList();
             switch (msg.what) {
                 case Constants.MESSAGE_STATE_CHANGE:
                     TextView textView = findViewById(R.id.bt_status_text
@@ -174,10 +132,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case Constants.MESSAGE_WRITE:
-                    //dont do anything
+                    // dont do anything
+                    /*
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
+                    */
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
@@ -203,5 +163,44 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    // creation methods
+    private void showBluetoothFragment() {
+        FragmentManager fm = getSupportFragmentManager();
+        BluetoothFragment bluetoothDialogFragment = BluetoothFragment.newInstance("Bluetooth Menu");
+        bluetoothDialogFragment.show(fm, "bluetooth_fragment");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.bluetooth_menu) {
+            if(mBluetoothMgr.setupBluetooth())
+                showBluetoothFragment();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    // cleanup methods
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
+        mBluetoothMgr.stop();
+    }
     //end of class
 }

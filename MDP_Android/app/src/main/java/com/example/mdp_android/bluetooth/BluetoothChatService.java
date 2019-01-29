@@ -96,17 +96,6 @@ public class BluetoothChatService {
         return msg;
     }
 
-    // multiple value variant
-    private Message prepareMsg(int msgType, int count, String[] TAGs , String[] values){
-        // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(msgType);
-        Bundle bundle = new Bundle();
-        for (int i = 0; i < count; i++){
-            bundle.putString(TAGs[i], values[i]);
-        }
-        msg.setData(bundle);
-        return msg;
-    }
     /**
      * Update UI title according to the current state of the chat connection
      */
@@ -205,9 +194,7 @@ public class BluetoothChatService {
         mConnectedThread = new ConnectedThread(socket, socketType);
         mConnectedThread.start();
         mConnectedDevice = device;
-        String[] TAGs = {Constants.DEVICE_NAME, Constants.DEVICE_ADDRESS};
-        String[] values = {device.getName(), device.getAddress()};
-        mHandler.sendMessage(prepareMsg(Constants.MESSAGE_DEVICE_NAME, 2, TAGs, values));
+        mHandler.sendMessage(prepareMsg(Constants.MESSAGE_DEVICE_NAME, Constants.DEVICE_NAME, device.getName()));
         updateUI();
     }
 
@@ -273,14 +260,14 @@ public class BluetoothChatService {
         mState = STATE_LOST;
         updateUI();
 
-        if(mAttemptReconnect) {
+        if(mAttemptReconnect && BluetoothManager.isBluetoothAvailable()) {
             mHandler.sendMessage(prepareMsg(Constants.MESSAGE_TOAST, Constants.TOAST, "Device connection was lost. Attempting to reconnect..."));
             int counter = 0;
             int maxTries = 3;
             while (mState != STATE_CONNECTED && counter < maxTries) {
                 Log.i("Reconnect", "trying reconnect");
                 //safety checks
-                if (BluetoothManager.isBluetoothAvailable() && mConnectedDevice != null) {
+                if (mConnectedDevice != null) {
                     // attempt to reconnect 3 times
                     counter++;
                     mHandler.sendMessage(prepareMsg(Constants.MESSAGE_TOAST, Constants.TOAST, "Attempting to reconnect (" + counter + ")"));

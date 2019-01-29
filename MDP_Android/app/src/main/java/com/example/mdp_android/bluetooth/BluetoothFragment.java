@@ -59,15 +59,6 @@ public class BluetoothFragment extends DialogFragment {
         return mFrag;
     }
 
-    public void updateUI(int type, String value){
-        if(type == Constants.MESSAGE_DEVICE_ADDRESS){
-            // Show connected status on item in List View based on address;
-        } else if (type == Constants.MESSAGE_STATE_CHANGE){
-            TextView textView = getView().findViewById(R.id.bt_status_text_frag);
-            textView.setText(value);
-        }
-    }
-
     // bluetooth functions
     public void connectDevice(String address, Boolean secure){
         mMgr.connectDevice(address, secure);
@@ -76,7 +67,7 @@ public class BluetoothFragment extends DialogFragment {
     }
 
     public void disconnectDevice(){
-        mMgr.disconnectDevice();
+        mMgr.stop();
     }
 
     public void listBluetoothDevices(){
@@ -109,9 +100,7 @@ public class BluetoothFragment extends DialogFragment {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mMgr.setupBluetooth() && mBluetoothAdapter.isDiscovering()){
-                    mBluetoothAdapter.cancelDiscovery();
-                }
+                cancelDiscovery();
                 DeviceDetails mDevice = (DeviceDetails) mAdapter.getItem(position);
                 if(mDevice.getConnected()){
                     disconnectDevice();
@@ -121,14 +110,6 @@ public class BluetoothFragment extends DialogFragment {
             }
         });
         lv.setAdapter(mAdapter);
-
-        // hack
-        if(BluetoothManager.isConnected()){
-            DeviceDetails mConnected = new DeviceDetails(BluetoothManager.getDeviceName(), BluetoothManager.getDeviceAddress(), true);
-            mAdapter.add(mConnected);
-            TextView textView = getView().findViewById(R.id.bt_status_text_frag);
-            textView.setText("Connected to: "+BluetoothManager.getDeviceName());
-        }
 
         // dialog fragment config
         String title = getArguments().getString("title", "Bluetooth Menu");
@@ -151,11 +132,43 @@ public class BluetoothFragment extends DialogFragment {
         params.height = Util.getScreenHeight() - 80;
         getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
         */
-        setupToolbar();
+        Toolbar toolbar = getView().findViewById(R.id.toolbar);
+        if(toolbar.getTitle() == null) setupToolbar();
+        refreshList();
+        displayConnectedDevice();
+    }
+
+    public void updateUI(int type, String value){
+        if(type == Constants.MESSAGE_DEVICE_ADDRESS){
+            // nothing
+        } else if (type == Constants.MESSAGE_STATE_CHANGE){
+            TextView textView = getView().findViewById(R.id.bt_status_text_frag);
+            textView.setText(value);
+        }
+
+        if(!BluetoothManager.isBluetoothAvailable()){
+            mAdapter.clear();
+        }
+        if(mAdapter.getCount() == 0){
+            displayConnectedDevice();
+        }
         refreshList();
     }
 
-    public void refreshList(){
+    /**
+     * Shows the current connected device as first item in the list.\
+     */
+    private void displayConnectedDevice(){
+        if(BluetoothManager.isConnected()){
+            DeviceDetails mConnected = new DeviceDetails(BluetoothManager.getDeviceName(), BluetoothManager.getDeviceAddress(), true);
+            mAdapter.clear();
+            mAdapter.add(mConnected);
+            TextView textView = getView().findViewById(R.id.bt_status_text_frag);
+            textView.setText("Connected to: "+BluetoothManager.getDeviceName());
+        }
+    }
+
+    private void refreshList(){
         ListView lv = (ListView)getView().findViewById(R.id.listView);
         lv.setAdapter(mAdapter);
     }
@@ -205,13 +218,22 @@ public class BluetoothFragment extends DialogFragment {
         }
     };
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    // clean up methods
+    private void cancelDiscovery(){
         if (mMgr.setupBluetooth() && mBluetoothAdapter.isDiscovering()){
             mBluetoothAdapter.cancelDiscovery();
         }
-        getActivity().unregisterReceiver(nReceiver);
+        try {
+            getActivity().unregisterReceiver(nReceiver);
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        cancelDiscovery();
         mFrag = null;
     }
 }
