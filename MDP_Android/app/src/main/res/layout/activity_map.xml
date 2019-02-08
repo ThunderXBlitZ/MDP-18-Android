@@ -112,14 +112,12 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tabIndicatorColor="@color/purpleText"
         app:tabTextColor="@color/purpleText">
 
         <android.support.design.widget.TabItem
             android:id="@+id/map"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="toCommTab"
             android:text="@string/map" />
 
         <android.support.design.widget.TabItem
