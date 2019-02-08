@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.ParcelUuid;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +30,13 @@ import com.example.mdp_android.MainActivity;
 import com.example.mdp_android.R;
 import com.example.mdp_android.Util;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.UUID;
+
+import static android.content.ContentValues.TAG;
 
 public class BluetoothFragment extends DialogFragment {
 
@@ -62,8 +70,7 @@ public class BluetoothFragment extends DialogFragment {
     // bluetooth functions
     public void connectDevice(String address, Boolean secure){
         mMgr.connectDevice(address, secure);
-        ListView lv = (ListView)getView().findViewById(R.id.listView);
-        lv.setAdapter(mAdapter);
+        refreshList();
     }
 
     public void disconnectDevice(){
@@ -114,13 +121,6 @@ public class BluetoothFragment extends DialogFragment {
         // dialog fragment config
         String title = getArguments().getString("title", "Bluetooth Menu");
         getDialog().setTitle(title);
-
-        /*
-        // Show soft keyboard automatically and request focus to field
-        mEditText.requestFocus();
-        getDialog().getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        */
     }
 
     @Override
@@ -170,6 +170,7 @@ public class BluetoothFragment extends DialogFragment {
 
     private void refreshList(){
         ListView lv = (ListView)getView().findViewById(R.id.listView);
+        lv.setAdapter(null);
         lv.setAdapter(mAdapter);
     }
 
@@ -203,17 +204,24 @@ public class BluetoothFragment extends DialogFragment {
      * Receiver for broadcast events from the system, mostly bluetooth related
      * Creates list of Bluetooth Devices detected
      */
+
+    private ArrayList<BluetoothDevice> mylist = new ArrayList<BluetoothDevice>();
     private final BroadcastReceiver nReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                 Toast.makeText(getActivity(), "Discovery started", Toast.LENGTH_SHORT).show();
                 mAdapter.clear();
+                mylist.clear();
             }
             else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 DeviceDetails newDevice = new DeviceDetails(device.getName(), device.getAddress(), false);
+                if(device.getName() == null /* || (!device.getName().contains("rasp")  && !device.getName().contains("DESKTOP"))*/ ) return;
+                Log.i("discovery", newDevice.toString());
                 mAdapter.add(newDevice);
+
+                mylist.add(device);
             }
         }
     };
@@ -223,17 +231,17 @@ public class BluetoothFragment extends DialogFragment {
         if (mMgr.setupBluetooth() && mBluetoothAdapter.isDiscovering()){
             mBluetoothAdapter.cancelDiscovery();
         }
-        try {
-            getActivity().unregisterReceiver(nReceiver);
-        } catch (Exception e) {
-            Log.e("Error", e.getMessage());
-        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         cancelDiscovery();
+        try {
+            getActivity().unregisterReceiver(nReceiver);
+        } catch (Exception e) {
+            Log.e("Error", e.getMessage());
+        }
         mFrag = null;
     }
 }

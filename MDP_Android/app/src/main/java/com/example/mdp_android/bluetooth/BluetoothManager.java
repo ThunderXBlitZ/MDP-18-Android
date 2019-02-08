@@ -1,13 +1,16 @@
 package com.example.mdp_android.bluetooth;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -53,8 +56,7 @@ public class BluetoothManager {
         }
         else{
             if(!mBluetoothAdapter.isEnabled()){
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                mActivity.startActivityForResult(enableBtIntent, BluetoothManager.BT_REQUEST_CODE);
+                Toast.makeText(mActivity, "Please enable Bluetooth and device location!",Toast.LENGTH_SHORT).show();
                 return false;
             }
             return true;

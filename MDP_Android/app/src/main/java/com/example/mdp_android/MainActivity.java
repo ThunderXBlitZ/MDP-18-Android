@@ -1,13 +1,16 @@
 package com.example.mdp_android;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -36,11 +39,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setupMaze(10,10);
 
+        // Only ask for these permissions on runtime when running Android 6.0 or higher
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+        }
+
         mBluetoothMgr = new BluetoothManager(this, mHandler);
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         registerReceiver(mReceiver, filter);
-        mBluetoothMgr.setupBluetooth();
+
+        // request Bluetooth to be switched on
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, BluetoothManager.BT_REQUEST_CODE);
     }
 
     /**
@@ -57,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     // Bluetooth functions
     // TBD: make this a non-layout function, so we can accept Strings as params
     public void sendMessage(View v){
-        String msg = "Hello World";
+        String msg = "Hi I am Android";
         mBluetoothMgr.sendMessage(msg);
     }
 
