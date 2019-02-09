@@ -1,42 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    tools:context=".MainActivity">
 
-    <!-- Maze container -->
-    <RelativeLayout android:layout_width="match_parent"
-        android:id="@+id/mazeLayout"
-        android:layout_height="@dimen/maze_length"
-        android:orientation="vertical"
-        android:background="#192832"></RelativeLayout>
 
-    <!-- Bot status bar -->
-    <RelativeLayout android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#FFFFFF"></RelativeLayout>
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/White"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
-    <!-- Button container -->
-    <RelativeLayout android:layout_width="match_parent"
-        android:layout_height="320dp"
-        android:background="#FFFFFF">
+    <android.support.v4.view.ViewPager
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:text="Send"
-            android:onClick="sendMessage"
-            android:id="@+id/send_btn"
-            />
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tabSelectedTextColor="@android:color/black"
+        app:tabTextColor="@color/purpleText">
 
-        <TextView
-            android:layout_width="200dp"
-            android:layout_height="50dp"
-            android:text="BT Status"
-            android:id="@+id/bt_status_text"
-            android:layout_toRightOf="@id/send_btn"
-            />
+        <android.support.design.widget.TabItem
+            android:id="@+id/map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/map" />
 
-    </RelativeLayout>
+        <android.support.design.widget.TabItem
+            android:id="@+id/bluetooth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bluetooth" />
 
-</LinearLayout>
+        <android.support.design.widget.TabItem
+            android:id="@+id/comm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/comm" />
+    </android.support.design.widget.TabLayout>
+
+
+
+
+
+</android.support.constraint.ConstraintLayout>

@@ -10,9 +10,9 @@
         android:id="@+id/button13"
         android:layout_width="143dp"
         android:layout_height="39dp"
-        android:layout_marginStart="116dp"
-        android:layout_marginLeft="116dp"
-        android:layout_marginTop="692dp"
+        android:layout_marginStart="108dp"
+        android:layout_marginLeft="108dp"
+        android:layout_marginTop="640dp"
         android:background="@color/colorAccent"
         android:text="FUNCTION 1"
         android:textColor="@color/White"
@@ -24,20 +24,24 @@
         android:id="@+id/button14"
         android:layout_width="143dp"
         android:layout_height="39dp"
+        android:layout_marginStart="344dp"
+        android:layout_marginLeft="344dp"
+        android:layout_marginTop="640dp"
         android:background="@color/colorAccent"
         android:text="FUNCTION 2"
         android:textColor="@color/White"
         android:textSize="18sp"
-        tools:layout_editor_absoluteX="337dp"
-        tools:layout_editor_absoluteY="692dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/button15"
         android:layout_width="143dp"
         android:layout_height="39dp"
-        android:layout_marginStart="228dp"
-        android:layout_marginLeft="228dp"
-        android:layout_marginTop="764dp"
+        android:layout_marginStart="212dp"
+        android:layout_marginLeft="212dp"
+        android:layout_marginTop="712dp"
         android:background="@color/pink"
         android:text="UPDATE"
         android:textColor="@color/White"
@@ -48,10 +52,10 @@
     <TextView
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
-        android:layout_height="12dp"
+        android:layout_height="18dp"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
-        android:layout_marginTop="384dp"
+        android:layout_marginTop="352dp"
         android:text="MESSAGE RECEIVED"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,41 +67,58 @@
         android:layout_height="18dp"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
-        android:layout_marginTop="608dp"
+        android:layout_marginTop="560dp"
         android:text="PREDEFINED FUNCTIONS"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tabIndicatorColor="@color/purpleText"
-        app:tabTextColor="@color/purpleText">
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="?attr/colorPrimary"-->
+        <!--android:minHeight="?attr/actionBarSize"-->
+        <!--android:theme="?attr/actionBarTheme"-->
+        <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
+        <!--app:theme="@style/ThemeOverlay.AppCompat.Dark"-->
+        <!--tools:ignore="MissingConstraints" />-->
 
-        <android.support.design.widget.TabItem
-            android:id="@+id/map"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/map" />
+    <!--<android.support.design.widget.TabLayout-->
+        <!--android:id="@+id/tabLayout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintHorizontal_bias="1.0"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--app:tabIndicatorColor="@color/purpleText"-->
+        <!--app:tabTextColor="@color/purpleText">-->
 
-        <android.support.design.widget.TabItem
-            android:id="@+id/bluetooth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/bluetooth" />
+        <!--<android.support.design.widget.TabItem-->
+            <!--android:id="@+id/map"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/map" />-->
 
-        <android.support.design.widget.TabItem
-            android:id="@+id/comm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/comm" />
-    </android.support.design.widget.TabLayout>
+        <!--<android.support.design.widget.TabItem-->
+            <!--android:id="@+id/bluetooth"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/bluetooth" />-->
+
+        <!--<android.support.design.widget.TabItem-->
+            <!--android:id="@+id/comm"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/comm" />-->
+    <!--</android.support.design.widget.TabLayout>-->
+
+    <!--<android.support.v4.view.ViewPager-->
+        <!--android:id="@+id/container"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_width="match_parent"-->
+        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"/>-->
 
     <EditText
         android:id="@+id/editText2"
