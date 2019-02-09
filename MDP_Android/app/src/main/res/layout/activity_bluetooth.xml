@@ -1,121 +1,59 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- fragment_edit_name.xml -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button6"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginLeft="64dp"
-        android:layout_marginTop="136dp"
-        android:background="@color/colorAccent"
-        android:text="ON"
-        android:textColor="@color/White"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <RelativeLayout
+        android:id="@+id/bluetooth_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="24dp"
+        android:paddingTop="80dp"
+        android:paddingRight="24dp">
 
-    <Button
-        android:id="@+id/button10"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginLeft="64dp"
-        android:layout_marginTop="184dp"
-        android:background="@color/colorAccent"
-        android:text="SCAN"
-        android:textColor="@color/White"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button11"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginLeft="64dp"
-        android:layout_marginTop="232dp"
-        android:background="@color/colorAccent"
-        android:text="PAIRED"
-        android:textColor="@color/White"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button12"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginLeft="64dp"
-        android:layout_marginTop="280dp"
-        android:background="@color/colorAccent"
-        android:text="VISIBILITY"
-        android:textColor="@color/White"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/bt_status_text_frag"
+            android:layout_width="fill_parent"
+            android:layout_height="56dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Not Connected" />
 
-    <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:background="?attr/colorPrimary"-->
-        <!--android:minHeight="?attr/actionBarSize"-->
-        <!--android:theme="?attr/actionBarTheme"-->
-        <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
-        <!--app:theme="@style/ThemeOverlay.AppCompat.Dark"-->
-        <!--tools:ignore="MissingConstraints" />-->
+        <Button
+            android:id="@+id/btn_discover"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="-4dp"
+            android:layout_width="100dp"
+            android:layout_height="24dp"
+            android:background="@color/pink"
+            android:textColor="@color/White"
+            android:textSize="12sp"
+            android:text="Discover"/>
 
-    <!--<android.support.design.widget.TabLayout-->
-        <!--android:id="@+id/tabLayout"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintHorizontal_bias="1.0"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent"-->
-        <!--app:tabTextColor="@color/purpleText">-->
+        <!-- Line for aesthetic purposes -->
+        <View
+            android:id="@+id/linebreak"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/bt_status_text_frag"
+            android:layout_marginTop="-36dp"
+            android:background="#CCCCCC" />
 
-        <!--<android.support.design.widget.TabItem-->
-            <!--android:id="@+id/map"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/map" />-->
-
-        <!--<android.support.design.widget.TabItem-->
-            <!--android:id="@+id/bluetooth"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/bluetooth" />-->
-
-        <!--<android.support.design.widget.TabItem-->
-            <!--android:id="@+id/comm"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/comm" />-->
-    <!--</android.support.design.widget.TabLayout>-->
-    <!--<android.support.v4.view.ViewPager-->
-        <!--android:id="@+id/container"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_width="match_parent"-->
-        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"/>-->
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="98dp"
-        android:layout_marginEnd="158dp"
-        android:layout_marginRight="158dp"
-        android:text="Available Devices"
-        android:textColor="@android:color/black"
-        android:textSize="22sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</android.support.constraint.ConstraintLayout>
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:color="#000000"
+            android:paddingTop="32dp"
+            android:scrollbars="none" />
+    </RelativeLayout>
+</RelativeLayout>

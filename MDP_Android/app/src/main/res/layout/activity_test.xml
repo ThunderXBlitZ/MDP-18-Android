@@ -7,7 +7,7 @@
     <!-- Maze container -->
     <RelativeLayout android:layout_width="match_parent"
         android:id="@+id/mazeLayout"
-        android:layout_height="@dimen/maze_length"
+        android:layout_height="@dimen/maze_height"
         android:orientation="vertical"
         android:background="#192832"></RelativeLayout>
 

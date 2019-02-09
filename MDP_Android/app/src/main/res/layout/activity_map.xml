@@ -4,101 +4,163 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <ImageButton
+        android:id="@+id/leftBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_marginStart="88dp"
+        android:layout_marginLeft="88dp"
+        android:layout_marginTop="680dp"
+        android:background="@color/White"
+        android:src="@drawable/ic_arrow_back_black_18dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/topBtn"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="164dp"
+        android:layout_marginLeft="164dp"
+        android:layout_marginTop="610dp"
+        android:background="@color/White"
+        android:src="@drawable/ic_arrow_upward_black_18dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/rightBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_marginStart="276dp"
+        android:layout_marginLeft="276dp"
+        android:layout_marginTop="680dp"
+        android:background="@color/White"
+        android:src="@drawable/ic_arrow_forward_black_18dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/bottomBtn"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="164dp"
+        android:layout_marginLeft="164dp"
+        android:layout_marginTop="780dp"
+        android:background="@color/White"
+        android:src="@drawable/ic_arrow_downward_black_18dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/autoBtn"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="52dp"
-        android:layout_marginLeft="52dp"
-        android:layout_marginTop="660dp"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="630dp"
         android:background="@color/pink"
         android:text="AUTO"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/manualBtn"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="220dp"
-        android:layout_marginLeft="220dp"
-        android:layout_marginTop="660dp"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="690dp"
         android:background="@color/pink"
         android:text="MANUAL"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/updateBtn"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="220dp"
-        android:layout_marginLeft="220dp"
-        android:layout_marginTop="728dp"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="780dp"
         android:background="@color/pink"
         android:text="UPDATE"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="300dp"
+        android:background="@color/colorAccent"
+        android:text="WAY POINTS"
+        android:textColor="@color/White"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/coordBtn"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="404dp"
-        android:layout_marginLeft="404dp"
-        android:layout_marginTop="324dp"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="360dp"
         android:background="@color/colorAccent"
         android:text="COORDINATES"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/exploreBtn"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="404dp"
-        android:layout_marginLeft="404dp"
-        android:layout_marginTop="384dp"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="420dp"
         android:background="@color/colorAccent"
         android:text="EXPLORE"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/fastestBtn"
-        android:layout_width="143dp"
+        android:layout_width="140dp"
         android:layout_height="34dp"
-        android:layout_marginStart="404dp"
-        android:layout_marginLeft="404dp"
-        android:layout_marginTop="444dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="480dp"
         android:background="@color/colorAccent"
         android:text="FASTEST"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/resetBtn"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="404dp"
-        android:layout_marginLeft="404dp"
-        android:layout_marginTop="504dp"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="540dp"
         android:background="@color/colorAccent"
         android:text="RESET"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -106,11 +168,12 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="116dp"
+        android:layout_marginTop="100dp"
         android:text="MOVING..."
-        android:textSize="22sp"
+        android:textSize="@dimen/description_text_size"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.92"
+        app:layout_constraintHorizontal_bias="0.89"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -118,47 +181,12 @@
     <TextView
         android:id="@+id/explText"
         android:layout_width="wrap_content"
-        android:layout_height="21dp"
-        android:layout_marginTop="168dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="140dp"
         android:text="Exploration:"
-        android:textSize="18sp"
+        android:textSize="@dimen/description_text_size"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.774"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/fastestTxt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="212dp"
-        android:text="Fastest Path:"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.793"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <RelativeLayout
-        android:id="@+id/mazeLayout"
-        android:layout_height="@dimen/maze_length"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.159"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></RelativeLayout>
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
-        android:layout_marginStart="404dp"
-        android:layout_marginLeft="404dp"
-        android:layout_marginTop="264dp"
-        android:background="@color/colorAccent"
-        android:text="WAY POINTS"
-        android:textColor="@color/White"
-        android:textSize="18sp"
+        app:layout_constraintHorizontal_bias="0.90"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -166,23 +194,46 @@
         android:id="@+id/explTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="168dp"
-        android:layout_marginEnd="52dp"
-        android:layout_marginRight="52dp"
+        android:layout_marginTop="170dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginRight="50dp"
         android:text="xxxx"
-        android:textSize="18sp"
+        android:textSize="@dimen/description_text_size"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/fastestTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="210dp"
+        android:text="Fastest Path:"
+        android:textSize="@dimen/description_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.90"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/fastestTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="212dp"
-        android:layout_marginEnd="52dp"
-        android:layout_marginRight="52dp"
+        android:layout_marginTop="240dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginRight="50dp"
         android:text="xxxx"
-        android:textSize="18sp"
+        android:textSize="@dimen/description_text_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/mazeLayout"
+        android:layout_height="@dimen/maze_width"
+        android:layout_width="@dimen/maze_height"
+        android:orientation="vertical"
+        android:layout_marginTop="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.110"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></RelativeLayout>
 </android.support.constraint.ConstraintLayout>

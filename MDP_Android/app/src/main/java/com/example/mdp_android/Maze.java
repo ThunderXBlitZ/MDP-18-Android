@@ -63,10 +63,6 @@ public class Maze extends ViewGroup {
             TILESIZE = Math.min(width/_numWidth, height/_numHeight);
         }
 
-        Log.d("maze","size:"+_tileList.size());
-        Log.d("maze","height:"+_numHeight);
-        Log.d("maze","width:"+_numWidth);
-
         int i;
         for (i=0; i < _tileList.size(); i++){
             int xPos = i%_numWidth*TILESIZE;

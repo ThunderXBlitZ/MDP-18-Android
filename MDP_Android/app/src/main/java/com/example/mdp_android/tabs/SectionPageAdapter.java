@@ -10,10 +10,10 @@ public class SectionPageAdapter extends FragmentPagerAdapter {
 
     private int numOfTabs;
 
-    public SectionPageAdapter(FragmentManager fn,  int numOfTabs){
-     super(fn);
-    this.numOfTabs = numOfTabs;
-}
+    public SectionPageAdapter(FragmentManager fn, int numOfTabs) {
+        super(fn);
+        this.numOfTabs = numOfTabs;
+    }
 
 
     public Fragment getItem(int position) {
@@ -31,6 +31,6 @@ public class SectionPageAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-            return numOfTabs;
+        return numOfTabs;
     }
 }
