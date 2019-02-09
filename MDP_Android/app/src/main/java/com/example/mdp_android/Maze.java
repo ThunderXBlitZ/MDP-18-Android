@@ -2,6 +2,7 @@ package com.example.mdp_android;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -9,33 +10,28 @@ import android.widget.RelativeLayout;
 import java.util.ArrayList;
 
 public class Maze extends ViewGroup {
-    private int _xIndex;
-    private int _yIndex;
+    private int _numWidth;
+    private int _numHeight;
     private ArrayList<MazeTile> _tileList;
-    public static int TILESIZE;
+    public static int TILESIZE = 0;
 
     /**
      * Constructor for maze. Creates x * y number of tiles and stores in arrayList '_tileList'
      * @param context
-     * @param xIndex
-     * @param yIndex
+     * @param numWidth
+     * @param numHeight
      */
-    public Maze(Context context, int xIndex, int yIndex) {
+    public Maze(Context context, int numWidth, int numHeight) {
         super(context);
-        _xIndex = xIndex;
-        _yIndex = yIndex;
-        TILESIZE = Util.getScreenWidth()/_xIndex;
-
-        _tileList = new ArrayList<MazeTile>(_xIndex*_yIndex);
+        _numWidth = numWidth;
+        _numHeight = numHeight;
+        _tileList = new ArrayList<MazeTile>(_numWidth*_numHeight);
 
         int i,j;
-        for (i=0; i < _yIndex; i++){
-            for(j = 0; j < _xIndex; j++){
+        for (i=0; i < _numWidth; i++){
+            for(j = 0; j < _numHeight; j++){
                 MazeTile mazeTile = new MazeTile(context);
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(TILESIZE, TILESIZE);
-                params.leftMargin = i*TILESIZE;
-                params.topMargin = j*TILESIZE;
-                this.addView(mazeTile, params);
+                this.addView(mazeTile);
                 _tileList.add(mazeTile);
 
                 mazeTile.setOnClickListener(tileListener); // for testing only
@@ -61,10 +57,21 @@ public class Maze extends ViewGroup {
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        for(int i=0; i < _tileList.size(); i++){
-            int xPos = Math.round(i%_xIndex) * TILESIZE;
-            int yPos = Math.round(i/_yIndex) * TILESIZE;
-            _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);
+        if(TILESIZE == 0){
+            int width = this.getWidth();
+            int height = this.getHeight();
+            TILESIZE = Math.min(width/_numWidth, height/_numHeight);
         }
-    }
+
+        Log.d("maze","size:"+_tileList.size());
+        Log.d("maze","height:"+_numHeight);
+        Log.d("maze","width:"+_numWidth);
+
+        int i;
+        for (i=0; i < _tileList.size(); i++){
+            int xPos = i%_numWidth*TILESIZE;
+            int yPos = i/_numWidth*TILESIZE;
+            _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);
+            }
+        }
 }
