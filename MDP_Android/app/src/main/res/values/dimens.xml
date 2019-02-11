@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="maze_width">500dp</dimen>
-    <dimen name="maze_height">375dp</dimen>
+    <dimen name="maze_width">250dp</dimen>
+    <dimen name="maze_height">180dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="btn_text_size"> 18sp </dimen>
     <dimen name="description_text_size"> 18sp </dimen>

@@ -1,22 +1,14 @@
 package com.example.mdp_android.bluetooth;
 
-import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
-import com.example.mdp_android.MainActivity;
-import com.example.mdp_android.Util;
+import com.example.mdp_android.Constants;
 
 /**
  * High-level Class that works on top of BlueChatService

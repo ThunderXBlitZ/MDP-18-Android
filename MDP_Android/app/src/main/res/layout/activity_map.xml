@@ -53,12 +53,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/autoBtn"
+        android:id="@+id/autoUpdateBtn"
         android:layout_width="140dp"
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
-        android:layout_marginTop="630dp"
+        android:layout_marginTop="690dp"
         android:background="@color/pink"
         android:text="AUTO"
         android:textColor="@color/White"
@@ -67,12 +67,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/manualBtn"
+        android:id="@+id/manualUpdateBtn"
         android:layout_width="140dp"
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
-        android:layout_marginTop="690dp"
+        android:layout_marginTop="750dp"
         android:background="@color/pink"
         android:text="MANUAL"
         android:textColor="@color/White"
@@ -86,23 +86,9 @@
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
-        android:layout_marginTop="780dp"
+        android:layout_marginTop="810dp"
         android:background="@color/pink"
         android:text="UPDATE"
-        android:textColor="@color/White"
-        android:textSize="@dimen/btn_text_size"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="140dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="430dp"
-        android:layout_marginLeft="430dp"
-        android:layout_marginTop="300dp"
-        android:background="@color/colorAccent"
-        android:text="WAY POINTS"
         android:textColor="@color/White"
         android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
@@ -114,9 +100,23 @@
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
-        android:layout_marginTop="360dp"
+        android:layout_marginTop="300dp"
         android:background="@color/colorAccent"
         android:text="COORDINATES"
+        android:textColor="@color/White"
+        android:textSize="@dimen/btn_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/waypoint_button"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="360dp"
+        android:background="@color/colorAccent"
+        android:text="WAY POINTS"
         android:textColor="@color/White"
         android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
@@ -137,12 +137,26 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/manualBtn"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="480dp"
+        android:background="@color/colorAccent"
+        android:text="MANUAL"
+        android:textColor="@color/White"
+        android:textSize="@dimen/btn_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
         android:id="@+id/fastestBtn"
         android:layout_width="140dp"
         android:layout_height="34dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
-        android:layout_marginTop="480dp"
+        android:layout_marginTop="540dp"
         android:background="@color/colorAccent"
         android:text="FASTEST"
         android:textColor="@color/White"
@@ -156,7 +170,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
-        android:layout_marginTop="540dp"
+        android:layout_marginTop="600dp"
         android:background="@color/colorAccent"
         android:text="RESET"
         android:textColor="@color/White"

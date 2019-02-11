@@ -14,25 +14,17 @@ import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
 
 import com.example.mdp_android.bluetooth.BluetoothChatService;
 import com.example.mdp_android.bluetooth.BluetoothManager;
-import com.example.mdp_android.bluetooth.Constants;
 import com.example.mdp_android.tabs.SectionPageAdapter;
 
 import java.util.ArrayList;

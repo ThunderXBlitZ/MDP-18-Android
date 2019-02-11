@@ -26,8 +26,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.example.mdp_android.MainActivity;
-import com.example.mdp_android.Util;
+import com.example.mdp_android.Constants;
 
 import java.io.IOException;
 import java.io.InputStream;

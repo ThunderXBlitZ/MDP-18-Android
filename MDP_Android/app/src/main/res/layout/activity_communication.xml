@@ -16,7 +16,7 @@
         android:background="@color/colorAccent"
         android:text="FUNCTION 1"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -30,7 +30,7 @@
         android:background="@color/colorAccent"
         android:text="FUNCTION 2"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints" />
@@ -45,7 +45,7 @@
         android:background="@color/pink"
         android:text="UPDATE"
         android:textColor="@color/White"
-        android:textSize="18sp"
+        android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -72,53 +72,6 @@
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:background="?attr/colorPrimary"-->
-        <!--android:minHeight="?attr/actionBarSize"-->
-        <!--android:theme="?attr/actionBarTheme"-->
-        <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
-        <!--app:theme="@style/ThemeOverlay.AppCompat.Dark"-->
-        <!--tools:ignore="MissingConstraints" />-->
-
-    <!--<android.support.design.widget.TabLayout-->
-        <!--android:id="@+id/tabLayout"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintHorizontal_bias="1.0"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent"-->
-        <!--app:tabIndicatorColor="@color/purpleText"-->
-        <!--app:tabTextColor="@color/purpleText">-->
-
-        <!--<android.support.design.widget.TabItem-->
-            <!--android:id="@+id/map"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/map" />-->
-
-        <!--<android.support.design.widget.TabItem-->
-            <!--android:id="@+id/bluetooth"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/bluetooth" />-->
-
-        <!--<android.support.design.widget.TabItem-->
-            <!--android:id="@+id/comm"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/comm" />-->
-    <!--</android.support.design.widget.TabLayout>-->
-
-    <!--<android.support.v4.view.ViewPager-->
-        <!--android:id="@+id/container"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_width="match_parent"-->
-        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"/>-->
 
     <EditText
         android:id="@+id/editText2"

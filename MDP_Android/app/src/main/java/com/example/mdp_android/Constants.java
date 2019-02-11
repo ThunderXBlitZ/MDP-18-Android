@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.mdp_android.bluetooth;
+package com.example.mdp_android;
 
 import com.example.mdp_android.bluetooth.BluetoothChatService;
 
@@ -38,7 +38,7 @@ public interface Constants {
 
     String PREF_NAME  = "custom_write_text";
 
-    //For status of GridImage
+    // mazeTile states
     int UNEXPLORED = 0;
     int EXPLORED = 1;
     int OBSTACLE = 2;
@@ -50,9 +50,16 @@ public interface Constants {
     int ROBOT_HEAD = 7;
     int ROBOT_BODY = 8;
 
-    int NORTH = 1;
-    int EAST = 2;
-    int SOUTH = 3;
-    int WEST = 4 ;
+    int NORTH = 9;
+    int EAST = 10;
+    int SOUTH = 11;
+    int WEST = 12;
 
+    // mapFragment input states
+    int idleMode = -1;
+    int coordinateMode = 0;
+    int waypointMode = 1;
+    int exploreMode = 2;
+    int fastestPathMode = 4;
+    int manualMode = 5;
 }
