@@ -23,16 +23,17 @@ public class Maze extends ViewGroup {
 
     /**
      * Constructor for maze. Creates 15 * 20 number of tiles and stores in arrayList '_tileList'
+     *
      * @param context
      */
     public Maze(Context context) {
         super(context);
-        _tileList = new ArrayList<MazeTile>(MAZE_WIDTH*MAZE_HEIGHT);
+        _tileList = new ArrayList<MazeTile>(MAZE_WIDTH * MAZE_HEIGHT);
 
         // generate mazeTiles, save to arraylist
-        int i,j;
-        for (i=0; i < MAZE_HEIGHT; i++){
-            for(j = 0; j < MAZE_WIDTH; j++){
+        int i, j;
+        for (i = 0; i < MAZE_HEIGHT; i++) {
+            for (j = 0; j < MAZE_WIDTH; j++) {
                 MazeTile mazeTile = new MazeTile(context, j, i);
                 this.addView(mazeTile);
                 _tileList.add(mazeTile);
@@ -42,25 +43,75 @@ public class Maze extends ViewGroup {
         }
     }
 
-    public int getState(){
+    public int getState() {
         return _inputState;
     }
 
-    public void setState(int newState){
+    public void setState(int newState) {
         _inputState = newState;
     }
 
-    public boolean coordinatesSet(){
+    public boolean coordinatesSet() {
         return _coordinatesSet;
     }
 
-    public boolean exploreCompleted(){
+    public boolean exploreCompleted() {
         return _exploreCompleted;
+    }
+
+    public void moveBot(String direction, Boolean isExplore) {
+        int[] _botHeadCoord = _botCoord.clone();
+
+        if (direction == "L" && _botCoord[0] > 1) {
+            clearBot(isExplore);
+            _botCoord[0] -= 1;
+            _botHeadCoord[0] = _botCoord[0] - 1;
+            updateBotTiles(_botCoord, _botHeadCoord);
+        } else if (direction == "U" && _botCoord[1] > 1) {
+            clearBot(isExplore);
+            _botCoord[1] -= 1;
+            _botHeadCoord[1] = _botCoord[1] - 1;
+            updateBotTiles(_botCoord, _botHeadCoord);
+        } else if (direction == "R" && _botCoord[0] < MAZE_WIDTH - 2) {
+            clearBot(isExplore);
+            _botCoord[0] += 1;
+            _botHeadCoord[0] = _botCoord[0] + 1;
+            updateBotTiles(_botCoord, _botHeadCoord);
+        } else if (direction == "D" && _botCoord[1] < MAZE_HEIGHT - 2) {
+            clearBot(isExplore);
+            _botCoord[1] += 1;
+            _botHeadCoord[1] = _botCoord[1] + 1;
+            updateBotTiles(_botCoord, _botHeadCoord);
+        } else if (direction == null) { // for start position, face north
+            _botHeadCoord[1] = _botCoord[1] - 1;
+            updateBotTiles(_botCoord, _botHeadCoord);
+        }
+    }
+
+    private void clearBot(Boolean isExplore){
+        if(isExplore){
+            setTileState(Constants.EXPLORED, _botCoord[0], _botCoord[1], 0, false);
+        } else {
+            setTileState(Constants.PREV, _botCoord[0], _botCoord[1], 0, false);
+        }
+    }
+
+    private void updateBotTiles(int[] _botCoord, int[] _botHeadCoord){
+        setTileState(Constants.ROBOT_BODY, _botCoord[0], _botCoord[1], 0, false);
+        if(_botHeadCoord[0] != _botCoord[0] || _botHeadCoord[1] != _botCoord[1]) setTileState(Constants.ROBOT_HEAD, _botHeadCoord[0], _botHeadCoord[1], 3, false);
     }
 
     public void explore(){
         // do exploration
+        for (MazeTile a:_tileList){
+            if(a.getState() != Constants.ROBOT_BODY && a.getState() != Constants.ROBOT_HEAD && a.getState() != Constants.EXPLORED){
+                a.forceUpdatePrevState();
+            }
+        }
         _exploreCompleted = true;
+        for (MazeTile a:_tileList){
+            if(a.getState() == Constants.EXPLORED) a.restorePrevState();
+        }
     }
 
     public void fastestPath(){
@@ -69,7 +120,7 @@ public class Maze extends ViewGroup {
 
     public void clearWaypoints(){
         for( Integer[] a:_waypointList){
-            setTileState(Constants.UNEXPLORED, a[0], a[1], 0);
+            setTileState(Constants.UNEXPLORED, a[0], a[1], 0, false);
         }
         _waypointList = new ArrayList<Integer[]>();
     }
@@ -86,13 +137,13 @@ public class Maze extends ViewGroup {
     }
 
     // updates tile state and re-renders maze
-    // mode: 0 -> Block of 9 tiles. 1 -> 3 horizontal tiles. 2 -> 3 vertical tiles
-    public int[] setTileState(int newState, int centerX, int centerY, int mode){
+    // mode: 0 -> Block of 9 tiles. 1 -> 3 horizontal tiles. 2 -> 3 vertical tiles. 3 -> single block
+    private int[] setTileState(int newState, int centerX, int centerY, int mode, boolean updatePrevState){
         if(mode == 0 || mode == 1){
             centerX = correctSelectedTileX(centerX);
         }
         if(mode == 0 || mode == 2){
-            centerY = correctSelectedTileX(centerY);
+            centerY = correctSelectedTileY(centerY);
         }
         // update tiles states
         int _center = centerX+centerY*MAZE_WIDTH;
@@ -117,15 +168,22 @@ public class Maze extends ViewGroup {
             _tempList.add(_tileList.get(_center));
             _tempList.add(_tileList.get(_center+MAZE_WIDTH));
             _tempList.add(_tileList.get(_center-MAZE_WIDTH));
+        } else if(mode == 3){
+            _tempList.add(_tileList.get(_center));
         }
         for (MazeTile a:_tempList){
-            a.updateState(newState);
+            if(newState == Constants.PREV){
+                a.restorePrevState();
+            } else {
+                a.updateState(newState, updatePrevState);
+            }
         }
         _tempList = null;
         int[] result = { centerX, centerY };
         return result;
     }
 
+    private int[] _botCoord = {0, 0};
     private int[] _startCoord = {0, 0};
     private int[] _endCoord = {0, 0};
     private int _coordCount = 0;
@@ -140,17 +198,21 @@ public class Maze extends ViewGroup {
                 if(_inputState == Constants.coordinateMode){
                     if (_coordCount == 0){
                         _coordinatesSet = false;
-                        setTileState(Constants.UNEXPLORED, _startCoord[0], _startCoord[1], 0);
-                        setTileState(Constants.UNEXPLORED, _endCoord[0], _endCoord[1], 0);
-                        _startCoord = setTileState(Constants.START, mazeTile.get_xPos(), mazeTile.get_yPos(), 0);
+                        // clear previously set start/end tiles
+                        setTileState(Constants.UNEXPLORED, _startCoord[0], _startCoord[1], 0, false);
+                        setTileState(Constants.UNEXPLORED, _endCoord[0], _endCoord[1], 0, false);
+                        // set start tiles
+                        _startCoord = setTileState(Constants.START, mazeTile.get_xPos(), mazeTile.get_yPos(), 0, true);
+                        _botCoord = _startCoord;
+                        moveBot(null, false); // set bot at start coordinates
                         _coordCount = 1;
                     } else if (_coordCount == 1){
-                        _endCoord = setTileState(Constants.GOAL, mazeTile.get_xPos(), mazeTile.get_yPos(), 0);
+                        _endCoord = setTileState(Constants.GOAL, mazeTile.get_xPos(), mazeTile.get_yPos(), 0, true);
                         _coordCount = 0;
                         _coordinatesSet = true;
                     }
                 } else if (_inputState == Constants.waypointMode){
-                    int[] waypoint = setTileState(Constants.WAYPOINT, mazeTile.get_xPos(), mazeTile.get_yPos(), 0);
+                    int[] waypoint = setTileState(Constants.WAYPOINT, mazeTile.get_xPos(), mazeTile.get_yPos(), 0, true);
                     Integer[] waypoint2 = {(Integer) waypoint[0], (Integer) waypoint[1]};
                     _waypointList.add(waypoint2);
                 } else {
@@ -172,7 +234,6 @@ public class Maze extends ViewGroup {
         if(yPos == MAZE_HEIGHT-1) yPos -= 1;
         return yPos;
     }
-
     /**
      * Required Android function for positioning child views, don't change this
      */

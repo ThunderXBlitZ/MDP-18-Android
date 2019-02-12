@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
                         mBluetoothMgr.stop();
-                        notifyFragments("Bluetooth", "off");
+                        // notifyFragments("Bluetooth", "off");
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
                         // do nothing

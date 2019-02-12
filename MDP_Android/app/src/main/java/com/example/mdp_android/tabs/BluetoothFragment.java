@@ -81,7 +81,7 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
 
     public void update(String type, String msg){
         switch("type") {
-            case "Bluetooth":
+            case "Bluetooth":  // for bluetooth switched off, currently not in use
                 break;
             case "1": // Constants.MESSAGE_STATE_CHANGE
                 TextView textView = getView().findViewById(R.id.bt_status_text_frag);

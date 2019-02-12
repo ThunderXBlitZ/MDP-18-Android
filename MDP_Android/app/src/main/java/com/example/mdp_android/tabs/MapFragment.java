@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,11 +48,12 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 } else if(maze.getState() == Constants.coordinateMode){
                     Toast.makeText(getActivity(), "Exiting coordinates mode...", Toast.LENGTH_SHORT).show();
                     maze.setState(Constants.idleMode);
+                    getView().findViewById(R.id.manualBtn).setEnabled(true);
                 }
             }
         });
 
-        // coordinates button
+        // waypoint button
         getView().findViewById(R.id.waypoint_button).setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -83,7 +85,6 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     maze.setState(Constants.exploreMode);
                     maze.explore();
                     // when exploration is complete
-                    getView().findViewById(R.id.manualBtn).setEnabled(true);
                     getView().findViewById(R.id.fastestBtn).setEnabled(true);
                     maze.setState(Constants.idleMode);
                 }
@@ -96,7 +97,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v)
             {
-                if(maze.getState() == Constants.idleMode){
+                if(maze.getState() == Constants.idleMode && maze.coordinatesSet()){
                     Toast.makeText(getActivity(), "Entering manual mode: control robot by tapping tiles or arrow buttons.", Toast.LENGTH_SHORT).show();
                     getView().findViewById(R.id.waypoint_button).setEnabled(false);
                     maze.setState(Constants.manualMode);
@@ -142,6 +143,51 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 }
             }
         });
+
+        // directional buttons
+        getView().findViewById(R.id.leftBtn).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(maze.getState() == Constants.manualMode){
+                    maze.moveBot("L", true); // to change to send bluetooth command
+                }
+            }
+        });
+
+        getView().findViewById(R.id.rightBtn).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(maze.getState() == Constants.manualMode){
+                    maze.moveBot("R", true); // to change to send bluetooth command
+                }
+            }
+        });
+
+        getView().findViewById(R.id.upBtn).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(maze.getState() == Constants.manualMode){
+                    maze.moveBot("U", true); // to change to send bluetooth command
+                }
+            }
+        });
+
+        getView().findViewById(R.id.downBtn).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(maze.getState() == Constants.manualMode){
+                    maze.moveBot("D", true); // to change to send bluetooth command
+                }
+            }
+        });
     }
 
     /**
@@ -160,8 +206,16 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
 
     public void update(String type, String msg){
         switch("type"){
-            case "Bluetooth":
+            case "Bluetooth": // for bluetooth switched off, currently not in use
             case "1": // Constants.MESSAGE_STATE_CHANGE
+                Log.d("MESSAGE_STATE_CHANGE", msg);
+                break;
+            case "2": // Constants.MESSAGE_READ i.e. received message
+                /*
+                if(msg == "L" || msg == "U" || msg == "D" || msg == "R"){
+                    maze.moveBot(msg, true);
+                }
+                */
                 break;
         }
     }

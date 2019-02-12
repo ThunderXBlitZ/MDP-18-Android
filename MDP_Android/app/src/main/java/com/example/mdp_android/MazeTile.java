@@ -22,7 +22,8 @@ public class MazeTile extends View {
     private static final int ROBOT_BODY = Color.RED;
     private static HashMap<Integer, Integer> colorMap = null;
 
-    private int _state = 0; // controls tile's appearance
+    private int _state = Constants.UNEXPLORED; // controls tile's appearance
+    private int _prevState = Constants.UNEXPLORED;
     private int _xPos = -1;
     private int _yPos = -1;
 
@@ -63,8 +64,21 @@ public class MazeTile extends View {
         }
     }
 
-    public void updateState(int newState){
+    public int getState(){
+        return _state;
+    }
+    public void forceUpdatePrevState(){
+        _prevState = _state;
+    }
+
+    public void updateState(int newState, boolean setPrevState){
+        if(setPrevState) _prevState = _state;
         _state = newState;
+        invalidate();
+    }
+
+    public void restorePrevState(){
+        _state = _prevState;
         invalidate();
     }
     /**
@@ -86,8 +100,7 @@ public class MazeTile extends View {
 
     public void reset(){
         _state = Constants.UNEXPLORED;
+        _prevState = _state;
         invalidate();
-        _xPos = -1;
-        _yPos = -1;
     }
 }

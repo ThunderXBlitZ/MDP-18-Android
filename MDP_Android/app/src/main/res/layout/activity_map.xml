@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/topBtn"
+        android:id="@+id/upBtn"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="164dp"
@@ -41,7 +41,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/bottomBtn"
+        android:id="@+id/downBtn"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="164dp"

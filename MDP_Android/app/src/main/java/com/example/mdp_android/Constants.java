@@ -45,7 +45,7 @@ public interface Constants {
     int START = 3;
     int GOAL = 4;
     int WAYPOINT = 5;
-    int STARTDIR = 6;
+    int PREV = 6;
 
     int ROBOT_HEAD = 7;
     int ROBOT_BODY = 8;
