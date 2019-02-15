@@ -62,4 +62,10 @@ public interface Constants {
     int exploreMode = 2;
     int fastestPathMode = 4;
     int manualMode = 5;
+
+    int up = 0;
+    int down = 1;
+    int left = 2;
+    int right = 3;
+
 }

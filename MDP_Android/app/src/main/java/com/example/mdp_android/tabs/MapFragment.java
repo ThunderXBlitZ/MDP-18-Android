@@ -151,7 +151,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             public void onClick(View v)
             {
                 if(maze.getState() == Constants.manualMode){
-                    maze.moveBot("L", true); // to change to send bluetooth command
+                    maze.moveBot(Constants.left, true); // to change to send bluetooth command
                 }
             }
         });
@@ -162,7 +162,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             public void onClick(View v)
             {
                 if(maze.getState() == Constants.manualMode){
-                    maze.moveBot("R", true); // to change to send bluetooth command
+                    maze.moveBot(Constants.right, true); // to change to send bluetooth command
                 }
             }
         });
@@ -173,7 +173,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             public void onClick(View v)
             {
                 if(maze.getState() == Constants.manualMode){
-                    maze.moveBot("U", true); // to change to send bluetooth command
+                    maze.moveBot(Constants.up, true); // to change to send bluetooth command
                 }
             }
         });
@@ -184,7 +184,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             public void onClick(View v)
             {
                 if(maze.getState() == Constants.manualMode){
-                    maze.moveBot("D", true); // to change to send bluetooth command
+                    maze.moveBot(Constants.down, true); // to change to send bluetooth command
                 }
             }
         });

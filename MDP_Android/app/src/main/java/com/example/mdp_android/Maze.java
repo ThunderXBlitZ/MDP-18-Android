@@ -59,32 +59,32 @@ public class Maze extends ViewGroup {
         return _exploreCompleted;
     }
 
-    public void moveBot(String direction, Boolean isExplore) {
+    public void moveBot(int direction, Boolean isExplore) {
         int[] _botHeadCoord = _botCoord.clone();
 
-        if (direction == "L" && _botCoord[0] > 1) {
+        if (direction == Constants.left && _botCoord[0] > 1) {
             clearBot(isExplore);
             _botCoord[0] -= 1;
             _botHeadCoord[0] = _botCoord[0] - 1;
-            updateBotTiles(_botCoord, _botHeadCoord);
-        } else if (direction == "U" && _botCoord[1] > 1) {
+            updateBotTiles(_botCoord, _botHeadCoord, false);
+        } else if (direction == Constants.up && _botCoord[1] > 1) {
             clearBot(isExplore);
             _botCoord[1] -= 1;
             _botHeadCoord[1] = _botCoord[1] - 1;
-            updateBotTiles(_botCoord, _botHeadCoord);
-        } else if (direction == "R" && _botCoord[0] < MAZE_WIDTH - 2) {
+            updateBotTiles(_botCoord, _botHeadCoord, false);
+        } else if (direction == Constants.right && _botCoord[0] < MAZE_WIDTH - 2) {
             clearBot(isExplore);
             _botCoord[0] += 1;
             _botHeadCoord[0] = _botCoord[0] + 1;
-            updateBotTiles(_botCoord, _botHeadCoord);
-        } else if (direction == "D" && _botCoord[1] < MAZE_HEIGHT - 2) {
+            updateBotTiles(_botCoord, _botHeadCoord, false);
+        } else if (direction == Constants.down && _botCoord[1] < MAZE_HEIGHT - 2) {
             clearBot(isExplore);
             _botCoord[1] += 1;
             _botHeadCoord[1] = _botCoord[1] + 1;
-            updateBotTiles(_botCoord, _botHeadCoord);
-        } else if (direction == null) { // for start position, face north
+            updateBotTiles(_botCoord, _botHeadCoord, false);
+        } else if (direction == -1) { // for start position, face north
             _botHeadCoord[1] = _botCoord[1] - 1;
-            updateBotTiles(_botCoord, _botHeadCoord);
+            updateBotTiles(_botCoord, _botHeadCoord, true);
         }
     }
 
@@ -96,8 +96,8 @@ public class Maze extends ViewGroup {
         }
     }
 
-    private void updateBotTiles(int[] _botCoord, int[] _botHeadCoord){
-        setTileState(Constants.ROBOT_BODY, _botCoord[0], _botCoord[1], 0, false);
+    private void updateBotTiles(int[] _botCoord, int[] _botHeadCoord, boolean updatePrevState){
+        setTileState(Constants.ROBOT_BODY, _botCoord[0], _botCoord[1], 0, updatePrevState);
         if(_botHeadCoord[0] != _botCoord[0] || _botHeadCoord[1] != _botCoord[1]) setTileState(Constants.ROBOT_HEAD, _botHeadCoord[0], _botHeadCoord[1], 3, false);
     }
 
@@ -204,7 +204,7 @@ public class Maze extends ViewGroup {
                         // set start tiles
                         _startCoord = setTileState(Constants.START, mazeTile.get_xPos(), mazeTile.get_yPos(), 0, true);
                         _botCoord = _startCoord;
-                        moveBot(null, false); // set bot at start coordinates
+                        moveBot(-1, false); // set bot at start coordinates
                         _coordCount = 1;
                     } else if (_coordCount == 1){
                         _endCoord = setTileState(Constants.GOAL, mazeTile.get_xPos(), mazeTile.get_yPos(), 0, true);
@@ -215,8 +215,20 @@ public class Maze extends ViewGroup {
                     int[] waypoint = setTileState(Constants.WAYPOINT, mazeTile.get_xPos(), mazeTile.get_yPos(), 0, true);
                     Integer[] waypoint2 = {(Integer) waypoint[0], (Integer) waypoint[1]};
                     _waypointList.add(waypoint2);
-                } else {
-
+                } else if (_inputState == Constants.manualMode){
+                    if (mazeTile.get_xPos() == _botCoord[0]){
+                        if(mazeTile.get_yPos() == _botCoord[1]+2){
+                            moveBot(Constants.down, true);
+                        } else if(mazeTile.get_yPos() == _botCoord[1]-2){
+                            moveBot(Constants.up, true);
+                        }
+                    } else if (mazeTile.get_yPos() == _botCoord[1]){
+                        if(mazeTile.get_xPos() == _botCoord[0]+2){
+                            moveBot(Constants.right, true);
+                        } else if(mazeTile.get_xPos() == _botCoord[0]-2){
+                            moveBot(Constants.left, true);
+                        }
+                    }
                 }
                 /// mazeTile.clicked();
             }
