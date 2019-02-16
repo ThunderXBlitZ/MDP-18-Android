@@ -1,58 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/button13"
+        android:id="@+id/fn1Btn"
         android:layout_width="143dp"
         android:layout_height="39dp"
         android:layout_marginStart="108dp"
         android:layout_marginLeft="108dp"
         android:layout_marginTop="640dp"
-        android:background="@color/colorAccent"
+        android:background="@color/pink"
         android:text="FUNCTION 1"
         android:textColor="@color/White"
-        android:textSize="@dimen/btn_text_size"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button14"
+        android:id="@+id/fn2Btn"
         android:layout_width="143dp"
         android:layout_height="39dp"
         android:layout_marginStart="344dp"
         android:layout_marginLeft="344dp"
         android:layout_marginTop="640dp"
-        android:background="@color/colorAccent"
+        android:background="@color/pink"
         android:text="FUNCTION 2"
         android:textColor="@color/White"
-        android:textSize="@dimen/btn_text_size"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints" />
 
     <Button
-        android:id="@+id/button15"
-        android:layout_width="143dp"
-        android:layout_height="39dp"
+        android:id="@+id/msgUpdateBtn"
+        android:layout_width="165dp"
+        android:layout_height="45dp"
         android:layout_marginStart="212dp"
         android:layout_marginLeft="212dp"
         android:layout_marginTop="712dp"
-        android:background="@color/pink"
-        android:text="UPDATE"
+        android:background="@color/colorPrimary"
+        android:text="RECONFIGURE"
         android:textColor="@color/White"
-        android:textSize="@dimen/btn_text_size"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/sendMsgBtn"
+        android:layout_width="143dp"
+        android:layout_height="39dp"
+        android:layout_marginStart="384dp"
+        android:layout_marginLeft="384dp"
+        android:layout_marginTop="280dp"
+        android:background="@color/pink"
+        android:text="SEND"
+        android:textColor="@color/White"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView6"
         android:layout_width="wrap_content"
-        android:layout_height="18dp"
+        android:layout_height="24dp"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
         android:layout_marginTop="352dp"
@@ -64,20 +77,21 @@
     <TextView
         android:id="@+id/textView8"
         android:layout_width="wrap_content"
-        android:layout_height="18dp"
+        android:layout_height="26dp"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
-        android:layout_marginTop="560dp"
+        android:layout_marginTop="580dp"
         android:text="PREDEFINED FUNCTIONS"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/editText"
         android:layout_width="477dp"
         android:layout_height="153dp"
-        android:layout_marginTop="152dp"
+        android:layout_marginTop="120dp"
         android:ems="10"
         android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
@@ -91,9 +105,20 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
-        android:layout_marginTop="116dp"
+        android:layout_marginTop="84dp"
         android:text="SEND MESSAGE"
         android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/msgReceived"
+        android:layout_width="481dp"
+        android:layout_height="144dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginLeft="44dp"
+        android:layout_marginTop="388dp"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

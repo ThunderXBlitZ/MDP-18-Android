@@ -19,6 +19,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -169,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     String readMessage = new String(readBuf, 0, msg.arg1);
+                    View Comm = getLayoutInflater().inflate(R.layout.activity_communication,null);
+                    TextView msgIn = findViewById(R.id.msgReceived);
+                    msgIn.setText(readMessage);
                     Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.MESSAGE_TOAST:

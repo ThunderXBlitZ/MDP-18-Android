@@ -1,54 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageButton
         android:id="@+id/leftBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:layout_marginStart="88dp"
-        android:layout_marginLeft="88dp"
-        android:layout_marginTop="680dp"
-        android:background="@color/White"
-        android:src="@drawable/ic_arrow_back_black_18dp"
+        android:layout_width="58dp"
+        android:layout_height="67dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginLeft="64dp"
+        android:layout_marginTop="688dp"
+        android:background="@android:color/transparent"
+        android:src="@mipmap/left_arrow_foreground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/upBtn"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="164dp"
-        android:layout_marginLeft="164dp"
-        android:layout_marginTop="610dp"
-        android:background="@color/White"
-        android:src="@drawable/ic_arrow_upward_black_18dp"
+        android:layout_width="67dp"
+        android:layout_height="58dp"
+        android:layout_marginStart="120dp"
+        android:layout_marginLeft="120dp"
+        android:layout_marginTop="628dp"
+        android:background="@android:color/transparent"
+        android:src="@mipmap/up_arrow_foreground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/rightBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:layout_marginStart="276dp"
-        android:layout_marginLeft="276dp"
-        android:layout_marginTop="680dp"
-        android:background="@color/White"
-        android:src="@drawable/ic_arrow_forward_black_18dp"
+        android:layout_width="58dp"
+        android:layout_height="67dp"
+        android:layout_marginStart="188dp"
+        android:layout_marginLeft="188dp"
+        android:layout_marginTop="688dp"
+        android:background="@android:color/transparent"
+        android:src="@mipmap/right_arrow_foreground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/downBtn"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="164dp"
-        android:layout_marginLeft="164dp"
-        android:layout_marginTop="780dp"
-        android:background="@color/White"
-        android:src="@drawable/ic_arrow_downward_black_18dp"
+        android:layout_width="67dp"
+        android:layout_height="58dp"
+        android:layout_marginStart="120dp"
+        android:layout_marginLeft="120dp"
+        android:layout_marginTop="756dp"
+        android:background="@android:color/transparent"
+        android:src="@mipmap/down_arrow_foreground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
