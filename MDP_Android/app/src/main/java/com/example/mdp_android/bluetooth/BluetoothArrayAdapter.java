@@ -45,8 +45,8 @@ public class BluetoothArrayAdapter<T> extends ArrayAdapter {
         addressText.setText(address);
 
         TextView statusText = (TextView) listItem.findViewById(R.id.item_device_status);
-        Boolean status = name.equals(BluetoothManager.getDeviceName()) && address.equals(BluetoothManager.getDeviceAddress());
-        if(status && BluetoothManager.isConnected()) {
+        Boolean status = name.equals(BluetoothManager.getInstance().getDeviceName()) && address.equals(BluetoothManager.getInstance().getDeviceAddress());
+        if(status && BluetoothManager.getInstance().isConnected()) {
             currentDevice.setConnected(true);
             statusText.setText("Connected");
             int color = (mContext.getResources().getColor(R.color.colorPrimary) & 0x88FFFFFF) | 0x40000000;

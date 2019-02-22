@@ -24,12 +24,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-
 import com.example.mdp_android.bluetooth.BluetoothChatService;
 import com.example.mdp_android.bluetooth.BluetoothManager;
 import com.example.mdp_android.tabs.SectionPageAdapter;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
     private BluetoothManager mBluetoothMgr;
@@ -145,18 +149,18 @@ public class MainActivity extends AppCompatActivity {
                         case BluetoothChatService.STATE_CONNECTED:
                             String tmp = "Connected to: " + mBluetoothMgr.getDeviceName();
                             Toast.makeText(MainActivity.this, tmp, Toast.LENGTH_SHORT).show();
-                            notifyFragments(String.valueOf(Constants.MESSAGE_STATE_CHANGE), tmp);
+                            notifyFragments(Constants.MESSAGE_STATE_CHANGE, null, tmp);
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
-                            notifyFragments(String.valueOf(Constants.MESSAGE_STATE_CHANGE), "Connecting...");
+                            notifyFragments(Constants.MESSAGE_STATE_CHANGE, null,"Connecting...");
                             break;
                         case BluetoothChatService.STATE_LOST:
-                            notifyFragments(String.valueOf(Constants.MESSAGE_STATE_CHANGE), "Connection Lost!");
+                            notifyFragments(Constants.MESSAGE_STATE_CHANGE, null, "Connection Lost!");
                             Toast.makeText(MainActivity.this, "Connection Lost!", Toast.LENGTH_SHORT).show();
                             break;
                         //case BluetoothChatService.STATE_LISTEN:
                         case BluetoothChatService.STATE_NONE:
-                            notifyFragments(String.valueOf(Constants.MESSAGE_STATE_CHANGE), "Not Connected");
+                            notifyFragments(Constants.MESSAGE_STATE_CHANGE, null, "Not Connected");
                             break;
                     }
                     break;
@@ -171,10 +175,25 @@ public class MainActivity extends AppCompatActivity {
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    View Comm = getLayoutInflater().inflate(R.layout.activity_communication,null);
+
                     TextView msgIn = findViewById(R.id.msgReceived);
                     msgIn.setText(readMessage);
+
                     Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
+                    String key = null; String value = null;
+                    try {
+                        JSONObject obj = new JSONObject(readMessage);
+                        Iterator<String> keys = obj.keys();
+
+                        while (keys.hasNext()) {
+                            key = keys.next();
+                            value = obj.optString(key);
+                        }
+                    } catch (JSONException e){
+                        value = readMessage;
+                    }
+
+                    notifyFragments(Constants.MESSAGE_READ, key, value);
                     break;
                 case Constants.MESSAGE_TOAST:
                     Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
@@ -194,12 +213,18 @@ public class MainActivity extends AppCompatActivity {
 
     // for handling callbacks from BluetoothChatService to the Tab Fragments
     public interface CallbackFragment {
-        public void update(String type, String msg);
+        public void update(int type, String key, String msg);
     }
 
-    public void notifyFragments(String type, String msg){
+    /**
+     * for passing messages/events from BluetoothManager
+     * @param type type of event: MESSAGE_STATE_CHANGE (bluetooth), MESSAGE_READ etc.
+     * @param key key of json or null if message is just a string
+     * @param msg json[key] or just the message string
+     */
+    public void notifyFragments(int type, String key, String msg){
         for(CallbackFragment i:callbackFragList){
-            i.update(type, msg);
+            i.update(type, key, msg);
         }
     }
 }

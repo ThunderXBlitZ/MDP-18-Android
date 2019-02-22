@@ -293,7 +293,7 @@ public class BluetoothChatService {
         mState = STATE_LOST;
         updateUI();
 
-        if(mAttemptReconnect && BluetoothManager.isBluetoothAvailable()) {
+        if(mAttemptReconnect && BluetoothManager.getInstance().setupBluetooth()) {
             mHandler.sendMessage(prepareMsg(Constants.MESSAGE_TOAST, Constants.TOAST, "Device connection was lost. Attempting to reconnect..."));
             int counter = 0;
             int maxTries = 3;
@@ -447,7 +447,7 @@ public class BluetoothChatService {
             setName("ConnectThread" + mSocketType);
 
             // Always cancel discovery because it will slow down a connection
-            if(BluetoothManager.isBluetoothAvailable()) mBluetoothAdapter.cancelDiscovery();
+            if(BluetoothManager.getInstance().setupBluetooth()) mBluetoothAdapter.cancelDiscovery();
 
             //safety check
             if(mmSocket != null) {

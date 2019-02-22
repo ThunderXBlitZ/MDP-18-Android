@@ -6,16 +6,19 @@ import android.bluetooth.BluetoothDevice;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.mdp_android.Constants;
+
+import org.json.JSONObject;
 
 /**
  * High-level Class that works on top of BlueChatService
  */
 public class BluetoothManager {
-    private static BluetoothAdapter mBluetoothAdapter;
-    private static BluetoothChatService mChatService;
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothChatService mChatService;
     private static BluetoothManager _instance;
     private Handler _mHandler;
     private Activity mActivity;
@@ -66,7 +69,7 @@ public class BluetoothManager {
     }
 
     public void connectDevice(String address, boolean secure) {
-        if(isBluetoothAvailable()) {
+        if(setupBluetooth()) {
             BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
             mChatService.connect(device, secure);
         }
@@ -76,29 +79,33 @@ public class BluetoothManager {
         mChatService.stop();
     }
 
-    public void sendMessage(String msg){
+    public void sendMessage(String type, String msg){
         if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
-            mChatService.write(msg.getBytes());
+            JSONObject json = new JSONObject();
+            try {
+                json.put(type, msg);
+            } catch (Exception e) {
+                Log.d("Error creating json", e.getMessage());
+            }
+            mChatService.write(json.toString().getBytes());
         } else {
             Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
         }
     }
 
-    public static String getDeviceName(){
+    public String getDeviceName(){
         return mChatService.getDeviceName();
     }
 
-    public static String getDeviceAddress(){
+    public String getDeviceAddress(){
         return mChatService.getDeviceAddress();
     }
 
-    public static Boolean isConnected() {
+    public Boolean isConnected() {
+        if (mChatService.getState() != mChatService.STATE_CONNECTED){
+            Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
+        }
         return mChatService.getState() == mChatService.STATE_CONNECTED;
-    }
-
-    public static Boolean isBluetoothAvailable(){
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        return mBluetoothAdapter != null && mBluetoothAdapter.isEnabled();
     }
 
     /**

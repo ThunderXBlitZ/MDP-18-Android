@@ -74,20 +74,12 @@ public class MazeTile extends View {
     public void updateState(int newState, boolean setPrevState){
         if(setPrevState) _prevState = _state;
         _state = newState;
-        invalidate();
+        invalidate(); // to do: batch invalidate
     }
 
     public void restorePrevState(){
         _state = _prevState;
         invalidate();
-    }
-    /**
-     * Callback for click listener. For testing only, to change in the future.
-     */
-    public void clicked(){
-        //change state
-        _state = 1;
-        invalidate(); //trigger redraw
     }
 
     public int get_xPos(){

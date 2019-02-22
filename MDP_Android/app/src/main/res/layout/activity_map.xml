@@ -110,12 +110,26 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/waypoint_button"
+        android:id="@+id/exploreBtn"
         android:layout_width="140dp"
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
         android:layout_marginTop="360dp"
+        android:background="@color/colorAccent"
+        android:text="EXPLORE"
+        android:textColor="@color/White"
+        android:textSize="@dimen/btn_text_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/waypoint_button"
+        android:layout_width="140dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="430dp"
+        android:layout_marginLeft="430dp"
+        android:layout_marginTop="420dp"
         android:background="@color/colorAccent"
         android:text="WAY POINTS"
         android:textColor="@color/White"
@@ -123,19 +137,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/exploreBtn"
-        android:layout_width="140dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="430dp"
-        android:layout_marginLeft="430dp"
-        android:layout_marginTop="420dp"
-        android:background="@color/colorAccent"
-        android:text="EXPLORE"
-        android:textColor="@color/White"
-        android:textSize="@dimen/btn_text_size"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+
 
     <Button
         android:id="@+id/manualBtn"

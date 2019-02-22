@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mdp_android.Constants;
 import com.example.mdp_android.MainActivity;
 import com.example.mdp_android.R;
 import com.example.mdp_android.bluetooth.BluetoothArrayAdapter;
@@ -79,17 +80,15 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
         lv.setAdapter(mAdapter);
     }
 
-    public void update(String type, String msg){
-        switch("type") {
-            case "Bluetooth":  // for bluetooth switched off, currently not in use
-                break;
-            case "1": // Constants.MESSAGE_STATE_CHANGE
+    public void update(int type, String key, String msg){
+        switch(type) {
+            case Constants.MESSAGE_STATE_CHANGE:
                 TextView textView = getView().findViewById(R.id.bt_status_text_frag);
                 textView.setText(msg);
                 break;
         }
 
-        if(!BluetoothManager.isBluetoothAvailable()){
+        if(!BluetoothManager.getInstance().setupBluetooth()){
             mAdapter.clear();
         }
         if(mAdapter.getCount() == 0){
@@ -117,12 +116,12 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
      * Shows the current connected device as first item in the list.
      */
     private void displayConnectedDevice(){
-        if(BluetoothManager.isConnected()){
-            DeviceDetails mConnected = new DeviceDetails(BluetoothManager.getDeviceName(), BluetoothManager.getDeviceAddress(), true);
+        if(BluetoothManager.getInstance().isConnected()){
+            DeviceDetails mConnected = new DeviceDetails(BluetoothManager.getInstance().getDeviceName(), BluetoothManager.getInstance().getDeviceAddress(), true);
             mAdapter.clear();
             mAdapter.add(mConnected);
             TextView textView = getView().findViewById(R.id.bt_status_text_frag);
-            textView.setText("Connected to: "+BluetoothManager.getDeviceName());
+            textView.setText("Connected to: "+BluetoothManager.getInstance().getDeviceName());
         }
     }
 

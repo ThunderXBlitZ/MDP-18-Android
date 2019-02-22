@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.mdp_android.Constants;
 import com.example.mdp_android.MainActivity;
 import com.example.mdp_android.R;
 import com.example.mdp_android.bluetooth.BluetoothChatService;
@@ -35,32 +36,18 @@ public class CommFragment extends Fragment {
     private EditText fn1String, fn2String;
     private Button sendBtn, updateBtn, fn1Btn, fn2Btn;
     private Button cancelBtn, saveBtn;
-    private View  popupInputDialogView;
+    private View popupInputDialogView;
 
     private BluetoothChatService mChatService = null;
     private BluetoothAdapter mBluetoothAdapter = null;
     private SharedPreferences mPreference;
-    private SharedPreferences.Editor mEditor;
-
-
-    private static final int REQUEST_ENABLE_BT = 3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-        // Get local Bluetooth adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        // If the adapter is null, then Bluetooth is not supported
-        if (mBluetoothAdapter == null) {
-            FragmentActivity activity = getActivity();
-            Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-            activity.finish();
-        }
+        BluetoothManager.getInstance().setupBluetooth();
     }
-
 
     @Override
     public void onStart() {
@@ -116,7 +103,7 @@ public class CommFragment extends Fragment {
 
         //Preference
         mPreference = PreferenceManager.getDefaultSharedPreferences(getContext());
-        mPreference = getActivity().getApplicationContext().getSharedPreferences("settings",0);
+        mPreference = getActivity().getApplicationContext().getSharedPreferences("settings", 0);
 
 
         // Set up touch listener for non-text box views to hide keyboard.
@@ -158,10 +145,14 @@ public class CommFragment extends Fragment {
                 });
 
                 // When user click the save button in the popup dialog.
-                saveBtn.setOnClickListener(new View.OnClickListener(){
+                saveBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        SharedPref(fn1String.getText().toString(), fn2String.getText().toString());
+                        SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("settings", 0);
+                        SharedPreferences.Editor prefEdit = prefs.edit();
+                        prefEdit.putString("s1", fn1String.getText().toString());
+                        prefEdit.putString("s2", fn2String.getText().toString());
+                        prefEdit.commit();
                         alertDialog.dismiss();
                     }
                 });
@@ -169,78 +160,54 @@ public class CommFragment extends Fragment {
         });
     }
 
-
-    public void update(String type, String msg) {
-        switch ("type") {
-            case "Bluetooth":
-                break;
-            case "1": // Constants.MESSAGE_STATE_CHANGE
-                break;
-        }
+    public void update(int type, String msg) {
+        // intentional no-op
     }
 
     private void setupChat() {
-        Log.d(TAG, "setupChat()");
-
-        //When user clicks on Send Button
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 View view = getView();
-
-                if (null != view) {
+                if (view != null) {
                     String message = msgOut.getText().toString();
-                    BluetoothManager.getInstance().sendMessage(message);
-                    //Toast message to notify user message has been sent
-                    Toast.makeText(getActivity(), "Message Sent!" , Toast.LENGTH_SHORT).show();
+                    if (BluetoothManager.getInstance().setupBluetooth()) {
+                        BluetoothManager.getInstance().sendMessage("MDF", message);
+                        Toast.makeText(getActivity(), "Message Sent!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
 
         //When user click on the Function 1 Button
-        fn1Btn.setOnClickListener(new View.OnClickListener(){
+        fn1Btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    BluetoothManager.getInstance().sendMessage(mPreference.getString("s1", null));
-                    //Toast message to notify user message has been sent
+                String s1 = mPreference.getString("s1", null);
+                if (BluetoothManager.getInstance().setupBluetooth() && s1 != null) {
+                    BluetoothManager.getInstance().sendMessage("MDF", s1);
                     Toast.makeText(getActivity(), "F1's String Sent!", Toast.LENGTH_SHORT).show();
-
+                }
             }
         });
 
         //When user click on the Function 2 Button
-        fn2Btn.setOnClickListener(new View.OnClickListener(){
+        fn2Btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BluetoothManager.getInstance().sendMessage(mPreference.getString("s2",null));
-                //Toast message to notify user message has been sent
-                Toast.makeText(getActivity(), "F2's String Sent!" , Toast.LENGTH_SHORT).show();
-
+                String s2 = mPreference.getString("s2", null);
+                if (BluetoothManager.getInstance().setupBluetooth() && s2 != null) {
+                    BluetoothManager.getInstance().sendMessage("MDF", s2);
+                    Toast.makeText(getActivity(), "F2's String Sent!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
-
-
     }
 
-    private void initMainActivityControls()
-    {
-        if(updateBtn == null)
-        {
-            updateBtn = getActivity().findViewById(R.id.msgUpdateBtn);
-        }
-
-
-    }
-
-    private void initPopupViewControls()
-    {
-        // Get layout inflater object.
+    private void initPopupViewControls() {
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 
-        // Inflate the popup dialog from a layout xml file.
         popupInputDialogView = layoutInflater.inflate(R.layout.activity_popupdialog, null);
-
 
         // Get user input Edittext and button
         fn1String = popupInputDialogView.findViewById(R.id.fn1Edit);
@@ -254,27 +221,13 @@ public class CommFragment extends Fragment {
         cancelBtn.setEnabled(true);
 
         // Display values from sharedPreference
-        fn1String.setText(mPreference.getString("s1",null));
-        fn2String.setText(mPreference.getString("s2",null));
-
+        fn1String.setText(mPreference.getString("s1", null));
+        fn2String.setText(mPreference.getString("s2", null));
     }
-
-
-    public void SharedPref(String Fn1,String Fn2){
-        SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences("settings", 0);
-        SharedPreferences.Editor prefEdit = prefs.edit();
-        prefEdit.putString("s1", Fn1);
-        prefEdit.putString("s2", Fn2);
-        prefEdit.commit();
-    }
-
 
     public static void hideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager =
-                (InputMethodManager) activity.getSystemService(
-                        Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(
-                activity.getCurrentFocus().getWindowToken(), 0);
+        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
     }
 }
 
