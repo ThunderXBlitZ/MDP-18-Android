@@ -88,7 +88,7 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
                 break;
         }
 
-        if(!BluetoothManager.getInstance().setupBluetooth()){
+        if(!BluetoothManager.getInstance().bluetoothAvailable()){
             mAdapter.clear();
         }
         if(mAdapter.getCount() == 0){
@@ -166,7 +166,7 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
 
     // clean up methods
     private void cancelDiscovery(){
-        if (mMgr.setupBluetooth() && mBluetoothAdapter.isDiscovering()){
+        if (mMgr.bluetoothAvailable() && mBluetoothAdapter.isDiscovering()){
             mBluetoothAdapter.cancelDiscovery();
         }
     }

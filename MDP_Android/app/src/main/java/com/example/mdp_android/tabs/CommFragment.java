@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mdp_android.Constants;
@@ -46,7 +47,6 @@ public class CommFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        BluetoothManager.getInstance().setupBluetooth();
     }
 
     @Override
@@ -161,7 +161,8 @@ public class CommFragment extends Fragment {
     }
 
     public void update(int type, String msg) {
-        // intentional no-op
+        TextView msgIn = getView().findViewById(R.id.msgReceived);
+        msgIn.setText(msg+'\n'+msgIn.getText());
     }
 
     private void setupChat() {
@@ -171,10 +172,12 @@ public class CommFragment extends Fragment {
                 View view = getView();
                 if (view != null) {
                     String message = msgOut.getText().toString();
-                    if (BluetoothManager.getInstance().setupBluetooth()) {
-                        BluetoothManager.getInstance().sendMessage("MDF", message);
-                        Toast.makeText(getActivity(), "Message Sent!", Toast.LENGTH_SHORT).show();
-                    }
+                    if (BluetoothManager.getInstance().bluetoothAvailable() && BluetoothManager.getInstance().isConnected()) {
+                            BluetoothManager.getInstance().sendMessage("MDF", message);
+                            Toast.makeText(getActivity(), "Message Sent!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            BluetoothManager.getInstance().notConnectedMsg();
+                        }
                 }
             }
         });
@@ -184,9 +187,11 @@ public class CommFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String s1 = mPreference.getString("s1", null);
-                if (BluetoothManager.getInstance().setupBluetooth() && s1 != null) {
+                if (BluetoothManager.getInstance().bluetoothAvailable() && BluetoothManager.getInstance().isConnected() && s1 != null) {
                     BluetoothManager.getInstance().sendMessage("MDF", s1);
                     Toast.makeText(getActivity(), "F1's String Sent!", Toast.LENGTH_SHORT).show();
+                } else {
+                    BluetoothManager.getInstance().notConnectedMsg();
                 }
             }
         });
@@ -196,9 +201,11 @@ public class CommFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String s2 = mPreference.getString("s2", null);
-                if (BluetoothManager.getInstance().setupBluetooth() && s2 != null) {
+                if (BluetoothManager.getInstance().bluetoothAvailable() && BluetoothManager.getInstance().isConnected() && s2 != null) {
                     BluetoothManager.getInstance().sendMessage("MDF", s2);
                     Toast.makeText(getActivity(), "F2's String Sent!", Toast.LENGTH_SHORT).show();
+                } else {
+                    BluetoothManager.getInstance().notConnectedMsg();
                 }
             }
         });

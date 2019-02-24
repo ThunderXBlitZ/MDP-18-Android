@@ -1,6 +1,7 @@
 package com.example.mdp_android.tabs;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -22,9 +23,13 @@ import com.example.mdp_android.bluetooth.BluetoothManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MapFragment extends Fragment implements MainActivity.CallbackFragment {
     private static final String TAG = "MapFragment";
     private Maze maze;
+    private Boolean _autoRefresh = false;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, @Nullable Bundle savedInstanceState) {
         // setHasOptionsMenu(true);
@@ -42,50 +47,6 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
         // controls
         initializeButtons();
         setupButtonListeners();
-    }
-
-    // Bluetooth functions
-    public void sendMessage(String type, String msg) {
-        BluetoothManager.getInstance().sendMessage(type, msg);
-    }
-
-    public void update(int type, String key, String msg) {
-        switch (type) {
-            case Constants.MESSAGE_STATE_CHANGE: // bluetooth state change, not required actually
-                Log.d("MESSAGE_STATE_CHANGE", msg);
-                break;
-            case Constants.MESSAGE_READ: // received message
-                Log.d("MESSAGE_READ", msg);
-                if(key.contains("moveDone") || key.contains("MoveDone")){
-                    int dir = Integer.parseInt(msg);
-                    if(dir == Constants.up || dir == Constants.down || dir == Constants.left || dir == Constants.right){
-                        maze.moveBot(dir, true);
-                    }
-                }
-                if(key == "exploreStepDone"){
-                     if(msg == ""){ // obstacle_detected
-
-                    } else if(msg == ""){ // arrow block detected
-
-                    }
-                    // send current state of maze to Algo
-                } else if(key == "exploreDone"){
-                    // update text
-                    getView().findViewById(R.id.waypoint_button).setEnabled(true);
-                    getView().findViewById(R.id.fastestBtn).setEnabled(true);
-                    maze.setState(Constants.idleMode);
-                } else if(key == "fastestPathStr"){
-                    // begin sequence of actions
-                } else if(key == "fastestPathMoveDone"){
-                    // update time display
-                    // click to reset
-                    maze.setState(Constants.idleMode);
-                    getView().findViewById(R.id.exploreBtn).setEnabled(false);
-                    getView().findViewById(R.id.manualBtn).setEnabled(false);
-                    getView().findViewById(R.id.fastestBtn).setEnabled(false);
-                }
-                break;
-        }
     }
 
     /**
@@ -117,7 +78,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 if (maze.getState() == Constants.idleMode) {
                     Toast.makeText(getActivity(), "Tap on tiles to set your start and end coordinates", Toast.LENGTH_SHORT).show();
                     maze.setState(Constants.coordinateMode);
-                } else if (maze.getState() == Constants.coordinateMode) {
+                } else if (maze.getState() == Constants.coordinateMode && maze.coordinatesSet()) {
                     Toast.makeText(getActivity(), "Exiting coordinates mode...", Toast.LENGTH_SHORT).show();
                     maze.setState(Constants.idleMode);
                     getView().findViewById(R.id.manualBtn).setEnabled(true);
@@ -132,10 +93,8 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 if (maze.getState() == Constants.idleMode && maze.coordinatesSet()) {
                     Toast.makeText(getActivity(), "Starting exploration!", Toast.LENGTH_SHORT).show();
                     getView().findViewById(R.id.coordBtn).setEnabled(false);
-
-                    // sendMessage("", "beginExplore");
+                    BluetoothManager.getInstance().sendMessage("beginExplore", "");
                     maze.setState(Constants.exploreMode);
-                    maze.explore();
                 }
             }
         });
@@ -153,6 +112,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 else if (maze.getState() == Constants.waypointMode) {
                     maze.setState(Constants.idleMode);
                     Toast.makeText(getActivity(), "Exiting waypoint mode...", Toast.LENGTH_SHORT).show();
+                    BluetoothManager.getInstance().sendMessage("waypoints", maze.getWaypointList());
                 }
             }
         });
@@ -165,6 +125,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     Toast.makeText(getActivity(), "Entering manual mode: control robot by tapping tiles or arrow buttons.", Toast.LENGTH_SHORT).show();
                     getView().findViewById(R.id.waypoint_button).setEnabled(false);
                     maze.setState(Constants.manualMode);
+                    BluetoothManager.getInstance().sendMessage("beginManual", "");
                 } else if (maze.getState() == Constants.manualMode) {
                     Toast.makeText(getActivity(), "Exiting Manual Mode!", Toast.LENGTH_SHORT).show();
                     maze.setState(Constants.idleMode);
@@ -176,17 +137,12 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
         getView().findViewById(R.id.fastestBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (maze.getState() == Constants.idleMode && maze.exploreCompleted()) {
-
-                    // start recording time?
-                    //sendMessage("MESSAGE_COMMAND", "...");
-                    // ... should be "begin_fastest" and maze array as string
-
+                if (maze.getState() == Constants.idleMode && maze.isExploreCompleted()) {
+                    // start recording time
                     Toast.makeText(getActivity(), "Sending robot on fastest path!", Toast.LENGTH_SHORT).show();
                     getView().findViewById(R.id.waypoint_button).setEnabled(false);
-
+                    BluetoothManager.getInstance().sendMessage("beginFastest", "");
                     maze.setState(Constants.fastestPathMode);
-                    maze.fastestPath();
                 }
             }
         });
@@ -197,9 +153,9 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             public void onClick(View v) {
                 if (maze.getState() == Constants.idleMode) {
                     Toast.makeText(getActivity(), "Maze reset!", Toast.LENGTH_SHORT).show();
+                    BluetoothManager.getInstance().sendMessage("reset", "");
                     maze.reset();
                     initializeButtons();
-                    maze.setState(Constants.idleMode);
                 }
             }
         });
@@ -209,8 +165,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    sendMessage("move", "sl");
-                    // maze.moveBot(Constants.left, true); // to change to send bluetooth command
+                    maze.attemptMoveBot(Constants.WEST);
                 }
             }
         });
@@ -219,8 +174,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    sendMessage("move", "sr");
-                    // maze.moveBot(Constants.right, true); // to change to send bluetooth command
+                    maze.attemptMoveBot(Constants.EAST);
                 }
             }
         });
@@ -229,8 +183,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    sendMessage("move", "f");
-                    // maze.moveBot(Constants.up, true); // to change to send bluetooth command
+                    maze.attemptMoveBot(Constants.NORTH);
                 }
             }
         });
@@ -239,18 +192,93 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    sendMessage("move", "r");
-                    // maze.moveBot(Constants.down, true); // to change to send bluetooth command
+                    maze.attemptMoveBot(Constants.SOUTH);
                 }
             }
         });
 
-        // temp
+        // status button
+        getView().findViewById(R.id.statusBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothManager.getInstance().sendMessage("getStatus", "");
+            }
+        });
+
+        // manual refresh button
         getView().findViewById(R.id.updateBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage("", "sendArena");
+                BluetoothManager.getInstance().sendMessage("sendArena", "");
             }
         });
+
+        // auto button
+        getView().findViewById(R.id.autoBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // on/off thread to auto call for maze updates
+                _autoRefresh = !_autoRefresh;
+                if (_autoRefresh) {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable(){
+                        public void run(){
+                            BluetoothManager.getInstance().sendMessage("sendArena","");
+                            if(_autoRefresh) handler.postDelayed(this, 3000);
+                        }
+                    }, 3000);
+                }
+            }
+        });
+    }
+
+    /* Handle Bluetooth messages received */
+    public void update(int type, String key, String msg) {
+        switch (type) {
+            case Constants.MESSAGE_STATE_CHANGE: // bluetooth state change, not required actually
+                // Log.d("MESSAGE_STATE_CHANGE", msg);
+                break;
+            case Constants.MESSAGE_READ: // received message
+                if(key == "exploreData"){
+                    maze.handleExplore(msg);
+                }
+                else if(key == "exploreDone"){
+                    // update text
+                    getView().findViewById(R.id.waypoint_button).setEnabled(true);
+                    getView().findViewById(R.id.fastestBtn).setEnabled(true);
+                    maze.setState(Constants.idleMode);
+                    Toast.makeText(getActivity(), "Exploration completed!", Toast.LENGTH_SHORT).show();
+                } else if(key == "fastestPathData"){
+                    maze.handleFastestPath(msg);
+                } else if(key == "grid"){
+                    maze.handleAMDGrid(msg);
+                }
+                else if(key == "fastestPathMoveDone"){
+                    // update time display
+                    // click to reset
+                    maze.setState(Constants.idleMode);
+                    getView().findViewById(R.id.exploreBtn).setEnabled(false);
+                    getView().findViewById(R.id.manualBtn).setEnabled(false);
+                    getView().findViewById(R.id.fastestBtn).setEnabled(false);
+                    Toast.makeText(getActivity(), "Fastest Path completed!", Toast.LENGTH_SHORT).show();
+                } else if (key == "robotPos"){
+                    String tmp[] = msg.substring(1, msg.length()-1).split(",");
+                    maze.updateBotPos(Integer.parseInt(tmp[0]), Integer.parseInt(tmp[1]));
+                } else if (key == "robotDir"){
+                    maze.updateBotDir(msg);
+                } else if (key == "status"){
+                    TextView tv = getView().findViewById(R.id.statusText);
+                    tv.setText(msg);
+                } else if (key == "arrowBlockUp") {
+                    maze.handleArrowBlock(Constants.NORTH, msg);
+                } else if (key == "arrowBlockDown") {
+                    maze.handleArrowBlock(Constants.SOUTH, msg);
+                } else if (key == "arrowBlockLeft") {
+                    maze.handleArrowBlock(Constants.WEST, msg);
+                } else if (key == "arrowBlockRight") {
+                    maze.handleArrowBlock(Constants.EAST, msg);
+                }
+                break;
+        }
     }
 }

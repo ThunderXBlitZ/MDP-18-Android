@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.mdp_android.Constants;
+import com.example.mdp_android.MockRPI;
 
 import org.json.JSONObject;
 
@@ -44,34 +45,32 @@ public class BluetoothManager {
      * Detects if bluetooth is on, else prompt user to switch on (return false)
      * @return true if bluetooth is on
      */
-    public Boolean setupBluetooth(){
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(mActivity, "Bluetooth not supported on this device!",Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        else{
-            if(!mBluetoothAdapter.isEnabled()){
-                Toast.makeText(mActivity, "Please enable Bluetooth and device location!",Toast.LENGTH_SHORT).show();
-                return false;
-            }
-            return true;
-        }
+    public Boolean bluetoothAvailable(){
+        return mBluetoothAdapter != null && mBluetoothAdapter.isEnabled();
+    }
+
+    public void bluetoothErrorMsg(){
+        Toast.makeText(mActivity, "Please turn on Bluetooth!", Toast.LENGTH_SHORT).show();
     }
 
     // discover nearby bluetooth devices
     public void listBluetoothDevices(){
-        if(setupBluetooth()){
+        if(bluetoothAvailable()){
             if (mBluetoothAdapter.isDiscovering()){
                 mBluetoothAdapter.cancelDiscovery();
             }
             mBluetoothAdapter.startDiscovery();
+        } else {
+            BluetoothManager.getInstance().bluetoothErrorMsg();
         }
     }
 
     public void connectDevice(String address, boolean secure) {
-        if(setupBluetooth()) {
+        if(bluetoothAvailable() && mChatService != null) {
             BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
             mChatService.connect(device, secure);
+        } else {
+            bluetoothErrorMsg();
         }
     }
 
@@ -79,18 +78,24 @@ public class BluetoothManager {
         mChatService.stop();
     }
 
+    public void sendMessage(String type, int num){
+        sendMessage(type, String.valueOf(num));
+    }
+
     public void sendMessage(String type, String msg){
-        if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
-            JSONObject json = new JSONObject();
-            try {
-                json.put(type, msg);
-            } catch (Exception e) {
-                Log.d("Error creating json", e.getMessage());
-            }
-            mChatService.write(json.toString().getBytes());
-        } else {
-            Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
-        }
+        // if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
+            String toSend = msg;
+            Log.d("msgBeforeSent", msg);
+            if (type != null) toSend = type+'|'+msg;
+
+            // for testing only
+            MockRPI.getInstance().receivedEvent(toSend);
+
+            // restore this when finished testing API
+            // mChatService.write(toSend.getBytes());
+       // } else {
+        //    Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
+       // }
     }
 
     public String getDeviceName(){
@@ -102,10 +107,11 @@ public class BluetoothManager {
     }
 
     public Boolean isConnected() {
-        if (mChatService.getState() != mChatService.STATE_CONNECTED){
-            Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
-        }
-        return mChatService.getState() == mChatService.STATE_CONNECTED;
+        return mChatService != null && mChatService.getState() == mChatService.STATE_CONNECTED;
+    }
+
+    public void notConnectedMsg(){
+        Toast.makeText(mActivity, "Bluetooth not connected to any device!", Toast.LENGTH_SHORT);
     }
 
     /**

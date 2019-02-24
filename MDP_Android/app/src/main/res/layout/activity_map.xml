@@ -54,28 +54,28 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/autoUpdateBtn"
+        android:id="@+id/statusBtn"
         android:layout_width="140dp"
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
         android:layout_marginTop="690dp"
         android:background="@color/pink"
-        android:text="AUTO"
+        android:text="Bot Status"
         android:textColor="@color/White"
         android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/manualUpdateBtn"
+        android:id="@+id/autoBtn"
         android:layout_width="140dp"
         android:layout_height="40dp"
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
         android:layout_marginTop="750dp"
         android:background="@color/pink"
-        android:text="MANUAL"
+        android:text="AUTO"
         android:textColor="@color/White"
         android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
@@ -89,7 +89,7 @@
         android:layout_marginLeft="430dp"
         android:layout_marginTop="810dp"
         android:background="@color/pink"
-        android:text="UPDATE"
+        android:text="REFRESH"
         android:textColor="@color/White"
         android:textSize="@dimen/btn_text_size"
         app:layout_constraintStart_toStartOf="parent"
@@ -182,7 +182,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/statusText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"

@@ -36,36 +36,34 @@ public interface Constants {
     String DEVICE_ADDRESS = "device_address";
     String TOAST = "toast";
 
-    String PREF_NAME  = "custom_write_text";
-
     // mazeTile states
     int UNEXPLORED = 0;
     int EXPLORED = 1;
-    int OBSTACLE = 2;
-    int START = 3;
-    int GOAL = 4;
-    int WAYPOINT = 5;
-    int PREV = 6;
+    int START = 2;
+    int GOAL = 3;
+    int WAYPOINT = 4;
 
-    int ROBOT_HEAD = 7;
-    int ROBOT_BODY = 8;
+    int ROBOT_HEAD = 5;
+    int ROBOT_BODY = 6;
 
-    int NORTH = 9;
+    int OBSTACLE = 7;
+    int NORTH = 8; // also used for directions
+    int SOUTH = 9;
     int EAST = 10;
-    int SOUTH = 11;
-    int WEST = 12;
+    int WEST = 11;
 
     // mapFragment input states
     int idleMode = -1;
     int coordinateMode = 0;
     int waypointMode = 1;
     int exploreMode = 2;
-    int fastestPathMode = 4;
-    int manualMode = 5;
+    int fastestPathMode = 3;
+    int manualMode = 4;
 
     int up = 0;
     int down = 1;
-    int left = 2;
-    int right = 3;
+    int right = 2;
+    int left = 3;
 
+    int tilePadding = 1;
 }

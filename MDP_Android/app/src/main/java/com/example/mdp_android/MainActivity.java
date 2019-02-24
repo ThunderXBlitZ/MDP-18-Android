@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
         // request Bluetooth to be switched on
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, BluetoothManager.BT_REQUEST_CODE);
+
+        MockRPI rpi = new MockRPI(this);
     }
 
     @Override
@@ -103,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
         if(fragment instanceof CallbackFragment){
             callbackFragList.add((CallbackFragment) fragment);
         }
+
+
     }
 
     /**
@@ -176,24 +180,16 @@ public class MainActivity extends AppCompatActivity {
                     byte[] readBuf = (byte[]) msg.obj;
                     String readMessage = new String(readBuf, 0, msg.arg1);
 
-                    TextView msgIn = findViewById(R.id.msgReceived);
-                    msgIn.setText(readMessage);
-
+                    // to remove
                     Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
-                    String key = null; String value = null;
-                    try {
-                        JSONObject obj = new JSONObject(readMessage);
-                        Iterator<String> keys = obj.keys();
 
-                        while (keys.hasNext()) {
-                            key = keys.next();
-                            value = obj.optString(key);
-                        }
-                    } catch (JSONException e){
-                        value = readMessage;
+                    String type = null; String value = readMessage;
+                    if(value != null && value.contains("|")){
+                        String[] tmp = value.split("|");
+                        type = tmp[0] != ""? tmp[0]: "";;
+                        value =  tmp[1] != ""? tmp[1]: "";
                     }
-
-                    notifyFragments(Constants.MESSAGE_READ, key, value);
+                    notifyFragments(Constants.MESSAGE_READ, type, value);
                     break;
                 case Constants.MESSAGE_TOAST:
                     Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
