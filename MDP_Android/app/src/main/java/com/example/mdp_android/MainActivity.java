@@ -19,6 +19,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
     private PagerAdapter pagerAdapter;
 
     private ArrayList<CallbackFragment> callbackFragList = new ArrayList<CallbackFragment>();
+
+    // RPI sends complete buffers of strings, so we will split by ';', and store any leftover msgs
+    // for the next msg
+    private String _storedMessage = "";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -183,13 +188,38 @@ public class MainActivity extends AppCompatActivity {
                     // to remove
                     Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
 
-                    String type = null; String value = readMessage;
-                    if(value != null && value.contains("|")){
-                        String[] tmp = value.split("|");
-                        type = tmp[0] != ""? tmp[0]: "";;
-                        value =  tmp[1] != ""? tmp[1]: "";
+                    if(readMessage == null || readMessage == "") return;
+                    else if(readMessage.contains(";")) {
+                        String[] msgList = readMessage.split(";");
+                        for (int i = 0; i < msgList.length; i++) {
+                            String processedMsg;
+                            if (i == 0) {
+                                processedMsg = _storedMessage + msgList[i];
+                                _storedMessage = "";
+                            } else if (i == msgList.length - 1) {
+                                if(readMessage.charAt(readMessage.length()-1) == ';'){
+                                    processedMsg = msgList[i];
+                                } else {
+                                    _storedMessage += msgList[i];
+                                    continue;
+                                }
+                            } else {
+                                processedMsg = msgList[i];
+                            }
+                            String type = null;
+                            String value = processedMsg;
+                            if (value != null && value.contains("|")) {
+                                String[] tmp = value.split("|");
+                                type = tmp[0] != "" ? tmp[0] : "";
+                                value = tmp[1] != "" ? tmp[1] : "";
+                            }
+                            Log.d("rawMsgReceived", processedMsg);
+                            notifyFragments(Constants.MESSAGE_READ, type,  value);
+                        }
+
+                    } else {
+                        _storedMessage += readMessage;
                     }
-                    notifyFragments(Constants.MESSAGE_READ, type, value);
                     break;
                 case Constants.MESSAGE_TOAST:
                     Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();

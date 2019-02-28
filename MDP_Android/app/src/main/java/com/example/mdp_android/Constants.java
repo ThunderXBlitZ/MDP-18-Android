@@ -48,8 +48,8 @@ public interface Constants {
 
     int OBSTACLE = 7;
     int NORTH = 8; // also used for directions
-    int SOUTH = 9;
-    int EAST = 10;
+    int EAST = 9;
+    int SOUTH = 10;
     int WEST = 11;
 
     // mapFragment input states

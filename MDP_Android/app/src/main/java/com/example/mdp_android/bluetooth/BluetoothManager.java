@@ -78,9 +78,23 @@ public class BluetoothManager {
         mChatService.stop();
     }
 
+    // overload for int
     public void sendMessage(String type, int num){
         sendMessage(type, String.valueOf(num));
     }
+
+/*
+    public void sendMessage(String type, String msg){
+        if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
+            String toSend = msg;
+
+            if (type != null) toSend = type+'|'+msg;
+            mChatService.write(toSend.getBytes());
+        } else {
+            Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
+        }
+    }
+*/
 
     public void sendMessage(String type, String msg){
         // if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
@@ -97,6 +111,7 @@ public class BluetoothManager {
         //    Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
        // }
     }
+
 
     public String getDeviceName(){
         return mChatService.getDeviceName();
