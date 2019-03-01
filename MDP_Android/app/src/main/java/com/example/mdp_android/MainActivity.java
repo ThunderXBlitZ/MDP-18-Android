@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, BluetoothManager.BT_REQUEST_CODE);
 
-        MockRPI rpi = new MockRPI(this);
+        // MockRPI rpi = new MockRPI(this);
     }
 
     @Override
@@ -209,11 +209,12 @@ public class MainActivity extends AppCompatActivity {
                             String type = null;
                             String value = processedMsg;
                             if (value != null && value.contains("|")) {
-                                String[] tmp = value.split("|");
+                                String[] tmp = value.split("\\|");
                                 type = tmp[0] != "" ? tmp[0] : "";
                                 value = tmp[1] != "" ? tmp[1] : "";
                             }
-                            Log.d("rawMsgReceived", processedMsg);
+                            Log.d("keyReceived", type);
+                            Log.d("msgReceived", value);
                             notifyFragments(Constants.MESSAGE_READ, type,  value);
                         }
 
