@@ -30,6 +30,7 @@ public interface Constants {
     int MESSAGE_DEVICE_NAME = 4;
     int MESSAGE_DEVICE_ADDRESS = 5;
     int MESSAGE_TOAST = 6;
+    int ACCEL = 7;
 
     // Key names received from the BluetoothChatService Handler
     String DEVICE_NAME = "device_name";
@@ -60,6 +61,7 @@ public interface Constants {
     int fastestPathMode = 3;
     int manualMode = 4;
 
+    // for Accelerometer
     int up = 0;
     int down = 1;
     int right = 2;

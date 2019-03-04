@@ -145,6 +145,7 @@ public class Maze extends ViewGroup {
         _inputState = Constants.idleMode;
         _coordCount = -1;
         _exploreCompleted = false;
+        _direction = Constants.NORTH;
         for (MazeTile i : _tileList) {
             i.reset();
         }
@@ -187,6 +188,8 @@ public class Maze extends ViewGroup {
     }
 
     public void handleArrowBlock(int type, String arrowSizeStr) {
+        if(!coordinatesSet()) return;
+
         int distBlock = 1;
         float arrowSize = 0;
 
@@ -259,10 +262,9 @@ public class Maze extends ViewGroup {
     private void handleWaypointInput(MazeTile mazeTile) {
         int[] waypointCoord = correctSelectedTile(mazeTile.get_xPos(), mazeTile.get_yPos(), 0);
         ArrayList<MazeTile> targetMazeTiles = getTargetTiles(waypointCoord[0], waypointCoord[1], 0);
+
         // check that target tiles are not occupied by obstacle or arrow block
-        for (MazeTile a : targetMazeTiles) {
-            if (isObstacle(a)) return;
-        }
+        for (MazeTile a : targetMazeTiles) {if (isObstacle(a)) return;}
         Integer[] waypoint2 = {waypointCoord[0], waypointCoord[1]};
 
         // lazy hack for one waypoint only
@@ -306,18 +308,18 @@ public class Maze extends ViewGroup {
             if (dir != _direction){
                 int diff = _direction-dir;
                 if(Math.abs(diff) == 2){ // opposite direction
-                    BluetoothManager.getInstance().sendMessage("MOVE", "L");
-                    BluetoothManager.getInstance().sendMessage("MOVE", "L");
+                    BluetoothManager.getInstance().sendMessage(null, "L");
+                    BluetoothManager.getInstance().sendMessage(null, "L");
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
                 } else if(diff == 1 || dir == Constants.WEST && _direction == Constants.NORTH) {
-                    BluetoothManager.getInstance().sendMessage("MOVE", "L");
+                    BluetoothManager.getInstance().sendMessage(null, "L");
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
                 } else if(diff == -1 || dir == Constants.NORTH && _direction == Constants.WEST) {
-                    BluetoothManager.getInstance().sendMessage("MOVE", "R");
+                    BluetoothManager.getInstance().sendMessage(null, "R");
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating right...");
                 }
             }
-            BluetoothManager.getInstance().sendMessage("MOVE", "F");
+            BluetoothManager.getInstance().sendMessage(null, "F");
             BluetoothManager.getInstance().sendMessage("SET_STATUS", "Moving forward...");
             moveBot(dir);
         }
@@ -397,6 +399,16 @@ public class Maze extends ViewGroup {
 
     // To be called after every update to maze data
     private void renderMaze() {
+        // unexplored / explored blocks
+        for (int i = 0; i < MAZE_HEIGHT * MAZE_WIDTH; i++) {
+            if (_exploreData[i] == Constants.UNEXPLORED) {
+                _tileList.get(i).setState(Constants.UNEXPLORED);
+            }
+            else {
+                _tileList.get(i).setState(Constants.EXPLORED);
+            }
+        }
+
         // set start & end tiles
         if (_coordCount >= 0) {
             ArrayList<MazeTile> targetTiles = getTargetTiles(_startCoord[0], _startCoord[1], 0);
@@ -428,15 +440,6 @@ public class Maze extends ViewGroup {
             // obstacles
             if (_obstacleData[i] == 1) {
                 _tileList.get(i).setState(Constants.OBSTACLE);
-            }
-            // unexplored
-            else if (_exploreData[i] == Constants.UNEXPLORED) {
-                _tileList.get(i).setState(Constants.UNEXPLORED);
-            }
-
-            //explored
-            else {
-                _tileList.get(i).setState(Constants.EXPLORED);
             }
         }
 
@@ -557,7 +560,7 @@ public class Maze extends ViewGroup {
         }
 
         int i; int count = _tileList.size();
-        for (i = 0; i < _tileList.size(); i++) {
+        for (i = 0; i < count; i++) {
             int xPos = i % MAZE_WIDTH * TILESIZE;
             int yPos = (MAZE_HEIGHT - 1 - i / MAZE_WIDTH) * TILESIZE;
             _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);

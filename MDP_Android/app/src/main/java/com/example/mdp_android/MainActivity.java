@@ -6,6 +6,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -36,7 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private BluetoothManager mBluetoothMgr;
 
     private SectionPageAdapter mSectionPageAdapter;
@@ -102,7 +106,51 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(enableBtIntent, BluetoothManager.BT_REQUEST_CODE);
 
         // MockRPI rpi = new MockRPI(this);
+        SensorManager sensorManager=(SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
+
+    @Override
+    public void onAccuracyChanged(Sensor arg0, int arg1) {
+    }
+
+    private boolean _accelReady = true;
+    final Handler handler = new Handler();
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
+            if(_accelReady){
+                float ax=event.values[0];
+                float ay=event.values[1];
+                float az=event.values[2];
+                String str = String.valueOf(ax)+' '+String.valueOf(ay)+' '+String.valueOf(az);
+
+                int accel_dir = -1;
+                if(ax <= 0 && ay <= -4 && az >= 5) accel_dir = Constants.up;
+                else if(ax <= 2 && ay >= 4 && az >= 4) accel_dir = Constants.down;
+                else if(ax >= 5 && ay >= -1 && az >= 5) accel_dir = Constants.left;
+                else if(ax <= -5 && ay >= -1 && az >= 5) accel_dir = Constants.right;
+
+
+                Log.e("accel", str);
+                Log.e("accel", String.valueOf(accel_dir));
+
+                Message msg = mHandler.obtainMessage(Constants.ACCEL);
+                Bundle bundle = new Bundle();
+                bundle.putString("ACCEL_EVENT", String.valueOf(accel_dir));
+                msg.setData(bundle);
+
+                mHandler.handleMessage(msg);
+                _accelReady = false;
+                handler.postDelayed(new Runnable(){
+                    public void run(){
+                        _accelReady = true;
+                    }
+                }, 3000);
+            }
+        }
+    }
+
 
     @Override
     public void onAttachFragment(Fragment fragment) {
@@ -110,8 +158,6 @@ public class MainActivity extends AppCompatActivity {
         if(fragment instanceof CallbackFragment){
             callbackFragList.add((CallbackFragment) fragment);
         }
-
-
     }
 
     /**
@@ -206,24 +252,29 @@ public class MainActivity extends AppCompatActivity {
                             } else {
                                 processedMsg = msgList[i];
                             }
-                            String type = null;
+                            String type = "";
                             String value = processedMsg;
+                            Log.d("comms_msgReceived", value);
                             if (value != null && value.contains("|")) {
                                 String[] tmp = value.split("\\|");
-                                type = tmp[0] != "" ? tmp[0] : "";
-                                value = tmp[1] != "" ? tmp[1] : "";
+                                if(tmp.length == 2){
+                                    type = tmp[0] != "" ? tmp[0] : "";
+                                    value = tmp[1] != "" ? tmp[1] : "";
+                                }
                             }
-                            Log.d("keyReceived", type);
-                            Log.d("msgReceived", value);
+                            Log.d("comms_keyReceived", type);
+                            Log.d("comms_msgReceived", value);
                             notifyFragments(Constants.MESSAGE_READ, type,  value);
                         }
-
                     } else {
                         _storedMessage += readMessage;
                     }
                     break;
                 case Constants.MESSAGE_TOAST:
                     Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.ACCEL:
+                    notifyFragments(Constants.ACCEL, null, msg.getData().getString("ACCEL_EVENT"));
                     break;
             }
         }

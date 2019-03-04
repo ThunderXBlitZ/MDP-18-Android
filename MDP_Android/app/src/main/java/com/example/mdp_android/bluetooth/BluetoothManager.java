@@ -88,6 +88,9 @@ public class BluetoothManager {
         if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
             String toSend = msg+';';
             if (type != null) toSend = type+'|'+msg+';';
+
+            Log.d("comms_send", toSend);
+
             mChatService.write(toSend.getBytes());
         } else {
             Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);

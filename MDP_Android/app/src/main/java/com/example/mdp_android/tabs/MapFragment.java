@@ -59,7 +59,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
      */
     private void initializeButtons() {
         getView().findViewById(R.id.coordBtn).setEnabled(true);
-        getView().findViewById(R.id.waypoint_button).setEnabled(false);
+        getView().findViewById(R.id.waypoint_button).setEnabled(true);
         getView().findViewById(R.id.exploreBtn).setEnabled(true);
         getView().findViewById(R.id.manualBtn).setEnabled(false);
         getView().findViewById(R.id.fastestBtn).setEnabled(false);
@@ -266,10 +266,11 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     getView().findViewById(R.id.waypoint_button).setEnabled(true);
                     getView().findViewById(R.id.fastestBtn).setEnabled(true);
                     maze.setState(Constants.idleMode);
-                    Toast.makeText(getActivity(), "Exploration completed!", Toast.LENGTH_SHORT).show();
+                    BluetoothManager.getInstance().sendMessage("SET_STATUS", "Exploration Completed!");
+                    // Toast.makeText(getActivity(), "Exploration completed!", Toast.LENGTH_SHORT).show();
                 } else if(key.equals("OBSTACLE_DATA")){
                     maze.handleFastestPath(msg);
-                } else if(key.equals("")){
+                } else if(key.equals("grid")){ // amd tool only
                     maze.handleAMDGrid(msg);
                 }
                 else if(key.equals("FASTEST_DONE")){
@@ -278,12 +279,13 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     _fastestTime = TimeUnit.SECONDS.convert(_fastestTime, TimeUnit.SECONDS);
                     TextView tv = getView().findViewById(R.id.fastestTime);
                     tv.setText(_fastestTime+" seconds");
+                    BluetoothManager.getInstance().sendMessage("SET_STATUS", "Fastest Path Completed!");
 
                     maze.setState(Constants.idleMode);
                     getView().findViewById(R.id.exploreBtn).setEnabled(false);
                     getView().findViewById(R.id.manualBtn).setEnabled(false);
                     getView().findViewById(R.id.fastestBtn).setEnabled(false);
-                    Toast.makeText(getActivity(), "Fastest Path completed!", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(getActivity(), "Fastest Path completed!", Toast.LENGTH_SHORT).show();
                 } else if (key.equals("BOT")){
                     maze.updateBotPosDir(msg);
                 } else if (key.equals("STATUS")){
@@ -299,6 +301,20 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     maze.handleArrowBlock(Constants.EAST, msg);
                 }
                 break;
+            case Constants.ACCEL: // received message
+                if(maze.getState() != Constants.manualMode) return;
+
+                int accelDir = Integer.parseInt(msg);
+                Log.i("accelReceived", msg);
+                if(accelDir == Constants.up){
+                    maze.attemptMoveBot(Constants.NORTH);
+                } else if(accelDir == Constants.down){
+                    maze.attemptMoveBot(Constants.SOUTH);
+                } else if(accelDir == Constants.right){
+                    maze.attemptMoveBot(Constants.EAST);
+                } else if(accelDir == Constants.left){
+                    maze.attemptMoveBot(Constants.WEST);
+                }
         }
     }
 }
