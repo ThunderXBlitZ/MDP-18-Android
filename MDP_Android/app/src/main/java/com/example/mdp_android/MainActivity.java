@@ -131,10 +131,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 else if(ax >= 5 && ay >= -1 && az >= 5) accel_dir = Constants.left;
                 else if(ax <= -5 && ay >= -1 && az >= 5) accel_dir = Constants.right;
 
-
-                Log.e("accel", str);
-                Log.e("accel", String.valueOf(accel_dir));
-
                 Message msg = mHandler.obtainMessage(Constants.ACCEL);
                 Bundle bundle = new Bundle();
                 bundle.putString("ACCEL_EVENT", String.valueOf(accel_dir));
@@ -146,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void run(){
                         _accelReady = true;
                     }
-                }, 3000);
+                }, 1000);
             }
         }
     }
@@ -257,7 +253,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             Log.d("comms_msgReceived", value);
                             if (value != null && value.contains("|")) {
                                 String[] tmp = value.split("\\|");
-                                if(tmp.length == 2){
+                                if(tmp.length == 1){
+                                    // there should be no msgs w/o type in our system
+                                    type = tmp[0] != "" ? tmp[0] : "";
+                                    value = "";
+                                }
+                                else if(tmp.length == 2){
                                     type = tmp[0] != "" ? tmp[0] : "";
                                     value = tmp[1] != "" ? tmp[1] : "";
                                 }

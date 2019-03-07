@@ -102,7 +102,7 @@
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
         android:layout_marginTop="800dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/darkGreen"
         android:text="Auto-Calibrate"
         android:textColor="@color/White"
         android:textSize="@dimen/btn_text_size"

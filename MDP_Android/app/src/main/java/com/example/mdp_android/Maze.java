@@ -90,19 +90,19 @@ public class Maze extends ViewGroup {
 
     // binaryData is Maze Size 300/4 = 75 hex characters
     public void handleExplore(String binaryData) {
-        _exploreData = parseHexCharToBinary(binaryData);
+        _exploreData = parseHexCharToBinary(binaryData, false);
         renderMaze();
     }
 
-    public void handleFastestPath(String binaryData) {
-        _obstacleData = parseHexCharToBinary(binaryData);
+    public void handleObstacle(String binaryData) {
+        _obstacleData = parseHexCharToBinary(binaryData, true);
         renderMaze();
     }
 
     // amd tool only
     public void handleAMDGrid(String binaryData) {
-        _exploreData = parseHexCharToBinary("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        _obstacleData = parseHexCharToBinary(binaryData);
+        _exploreData = parseHexCharToBinary("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", false);
+        _obstacleData = parseHexCharToBinary(binaryData, true);
         renderMaze();
     }
 
@@ -155,17 +155,12 @@ public class Maze extends ViewGroup {
     /**
      * Data from algo is 4 characters of 0/1 is converted to 1 hex char
      */
-    private int[] parseHexCharToBinary(String hexStr) {
+    private int[] parseHexCharToBinary(String hexStr, boolean isObstacle) {
         int mazeSize = MAZE_HEIGHT*MAZE_WIDTH;
-        if(hexStr.length() != mazeSize/4){
-            Log.e("mazeDataLength","Wrong length: "+hexStr.length()+" instead of "+mazeSize);
-            return _emptyArray;
-        }
+        int[] result = _emptyArray.clone();
+        int count = 0;
 
-        int[] result = new int[hexStr.length() * 4];
-        int count = mazeSize - 15;
-
-        String forTesting = "";
+        String fullString = "";
         for (int i = 0; i < hexStr.length(); i++) {
             String hexChar = Character.toString(hexStr.charAt(i));
             int hexValue = 0;
@@ -175,17 +170,44 @@ public class Maze extends ViewGroup {
                 Log.e("ParseHexChar", e.getMessage());
             }
             String binary = String.format("%4s", Integer.toString(hexValue, 2)).replace(' ', '0');
-            for (int j = 0; j < binary.length(); j++) {
-                forTesting += binary.charAt(j);
-                result[count] = Character.getNumericValue(binary.charAt(j));
+            fullString += binary;
+        }
+
+        // for explored data, algo requirement is to pad first and last 2 bits with 0s
+        if(!isObstacle) {
+            fullString = fullString.substring(2, mazeSize + 2);
+            for (int j = 0; j < fullString.length(); j++) {
+                result[count] = Character.getNumericValue(fullString.charAt(j));
                 count++;
-                if (count % 15 == 0){
-                    count -= 30;
-                }
+            }
+        } else {
+            Log.d("comms_obstacle", fullString);
+            // obstacle data is mapped to explored data
+            for (int j = 0; j < fullString.length(); j++) {
+                int myChar = Character.getNumericValue(fullString.charAt(j));
+
+                if(count >= mazeSize) break;
+
+                while (count < mazeSize-1 && _exploreData[count] == Constants.UNEXPLORED) count++;
+                Log.d("comms_round", String.valueOf(j)+" "+String.valueOf(myChar)+" "+String.valueOf(count));
+
+                if(count >= mazeSize) break;
+                result[count] = myChar;
+                count++;
             }
         }
         return result;
     }
+
+    /*
+    private void printIntArrayAsString(int[] data){
+        String tmp = "";
+        for (int i=0; i < data.length; i++){
+            tmp += data[i];
+        }
+        Log.d("comms_result", tmp);
+    }
+    */
 
     public void handleArrowBlock(int type, String arrowSizeStr) {
         if(!coordinatesSet()) return;
@@ -200,27 +222,27 @@ public class Maze extends ViewGroup {
             Log.e("arrowBlockPos", e.getMessage());
         }
 
-        if(arrowSize <= 5.2 && arrowSize >= 4.2) distBlock = 2;
-        else if (arrowSize >= 11.5 && arrowSize <= 12.5) distBlock = 3;
+        if(arrowSize <= 10.3 && arrowSize >= 9.8) distBlock = 3;
+        else if (arrowSize >= 5.2 && arrowSize <= 6.7) distBlock = 2;
         else return;
 
         Integer[] blockCoord = new Integer[3];
         blockCoord[2] = type;
         if (_direction == Constants.NORTH) {
-            blockCoord[0] = _botCoord[0]-1;
-            blockCoord[1] = _botCoord[1]+1;
+            blockCoord[0] = _botCoord[0];
+            blockCoord[1] = _botCoord[1];
             blockCoord[1] += 1 + distBlock;
         } else if (_direction == Constants.SOUTH) {
-            blockCoord[0] = _botCoord[0]+1;
-            blockCoord[1] = _botCoord[1]-1;
+            blockCoord[0] = _botCoord[0];
+            blockCoord[1] = _botCoord[1];
             blockCoord[1] -= 1 + distBlock;
         } else if (_direction == Constants.EAST) {
-            blockCoord[0] = _botCoord[0]+1;
-            blockCoord[1] = _botCoord[1]+1;
+            blockCoord[0] = _botCoord[0];
+            blockCoord[1] = _botCoord[1];
             blockCoord[0] += 1 + distBlock;
         } else if (_direction == Constants.WEST) {
-            blockCoord[0] = _botCoord[0]-1;
-            blockCoord[1] = _botCoord[1]-1;
+            blockCoord[0] = _botCoord[0];
+            blockCoord[1] = _botCoord[1];
             blockCoord[0] -= 1 + distBlock;
         }
         _arrowBlockList.add(blockCoord);
@@ -399,7 +421,10 @@ public class Maze extends ViewGroup {
 
     // To be called after every update to maze data
     private void renderMaze() {
-        // unexplored / explored blocks
+        // unexplored
+       // _exploreData = parseHexCharToBinary("f8007000ff01fe03fc07f80ff01fe03800400000000000000000000000000000000000000003", false);
+       // _obstacleData = parseHexCharToBinary("0f0", true);
+
         for (int i = 0; i < MAZE_HEIGHT * MAZE_WIDTH; i++) {
             if (_exploreData[i] == Constants.UNEXPLORED) {
                 _tileList.get(i).setState(Constants.UNEXPLORED);
@@ -436,8 +461,8 @@ public class Maze extends ViewGroup {
             setTile(headTile, Constants.ROBOT_HEAD);
         }
 
+        // obstacles
         for (int i = 0; i < MAZE_HEIGHT * MAZE_WIDTH; i++) {
-            // obstacles
             if (_obstacleData[i] == 1) {
                 _tileList.get(i).setState(Constants.OBSTACLE);
             }

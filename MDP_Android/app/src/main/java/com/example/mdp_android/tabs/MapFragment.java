@@ -92,7 +92,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Exploring...");
                     getView().findViewById(R.id.coordBtn).setEnabled(false);
                     BluetoothManager.getInstance().sendMessage("EX_START", "");
-                    maze.setState(Constants.exploreMode);
+                    // maze.setState(Constants.exploreMode);
                     _exploreTime = System.nanoTime();
                 }
             }
@@ -102,7 +102,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
         getView().findViewById(R.id.waypoint_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (maze.getState() == Constants.idleMode && maze.isExploreCompleted()) {
+                if (maze.getState() == Constants.idleMode /* && maze.isExploreCompleted()*/) {
                     maze.clearWaypoints();
                     maze.setState(Constants.waypointMode);
                     Toast.makeText(getActivity(), "Tap on tiles to set any waypoints", Toast.LENGTH_SHORT).show();
@@ -123,7 +123,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 if (maze.getState() == Constants.idleMode && maze.coordinatesSet()) {
                     Toast.makeText(getActivity(), "Entering manual mode: control robot by tapping tiles or arrow buttons.", Toast.LENGTH_SHORT).show();
                     maze.setState(Constants.manualMode);
-                    BluetoothManager.getInstance().sendMessage("MAN_START", "");
+                    // BluetoothManager.getInstance().sendMessage("MAN_START", "");
                 } else if (maze.getState() == Constants.manualMode) {
                     Toast.makeText(getActivity(), "Exiting Manual Mode!", Toast.LENGTH_SHORT).show();
                     maze.setState(Constants.idleMode);
@@ -269,7 +269,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Exploration Completed!");
                     // Toast.makeText(getActivity(), "Exploration completed!", Toast.LENGTH_SHORT).show();
                 } else if(key.equals("OBSTACLE_DATA")){
-                    maze.handleFastestPath(msg);
+                    maze.handleObstacle(msg);
                 } else if(key.equals("grid")){ // amd tool only
                     maze.handleAMDGrid(msg);
                 }

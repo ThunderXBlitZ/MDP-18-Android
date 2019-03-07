@@ -16,13 +16,13 @@ import java.util.Random;
 
 public class MazeTile extends View {
     private static final int UNEXPLORED = Color.BLACK;
-    private static final int EXPLORED = Color.BLUE;
-    private static final int OBSTACLE = Color.DKGRAY;
-    private static final int START = Color.YELLOW;
-    private static final int GOAL = Color.MAGENTA;
-    private static final int WAYPOINT = Color.CYAN;
-    private static final int ROBOT_HEAD = Color.DKGRAY;
-    private static final int ROBOT_BODY = Color.RED;
+    private static final int EXPLORED = Color.WHITE;
+    private static final int OBSTACLE = Color.RED;
+    private static int START;
+    private static final int GOAL = 0xFF19a08e;
+    private static int WAYPOINT;
+    private static int ROBOT_HEAD;
+    private static int ROBOT_BODY;
     private static HashMap<Integer, Integer> colorMap = null;
 
     private int _state = Constants.UNEXPLORED; // controls tile's appearance
@@ -35,6 +35,11 @@ public class MazeTile extends View {
         _yPos = YPos;
 
         if (colorMap == null){
+            ROBOT_BODY = getResources().getColor(R.color.pink);
+            ROBOT_HEAD = getResources().getColor(R.color.colorPrimaryDark);
+            START = getResources().getColor(R.color.darkGreen);
+            WAYPOINT = getResources().getColor(R.color.colorPrimary);
+
             colorMap = new HashMap<Integer, Integer>();
             colorMap.put(Constants.UNEXPLORED, UNEXPLORED);
             colorMap.put(Constants.EXPLORED, EXPLORED);

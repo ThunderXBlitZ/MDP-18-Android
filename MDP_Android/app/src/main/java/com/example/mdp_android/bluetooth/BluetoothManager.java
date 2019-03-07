@@ -10,9 +10,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.mdp_android.Constants;
-import com.example.mdp_android.MockRPI;
-
-import org.json.JSONObject;
 
 /**
  * High-level Class that works on top of BlueChatService

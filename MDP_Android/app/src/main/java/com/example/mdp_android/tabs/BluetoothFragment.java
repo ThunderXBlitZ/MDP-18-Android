@@ -84,7 +84,7 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
         switch(type) {
             case Constants.MESSAGE_STATE_CHANGE:
                 TextView textView = getView().findViewById(R.id.bt_status_text_frag);
-                textView.setText(msg);
+                if(textView != null) textView.setText(msg);
                 break;
         }
 
@@ -127,8 +127,10 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
 
     private void refreshList(){
         ListView lv = (ListView)getView().findViewById(R.id.listView);
-        lv.setAdapter(null);
-        lv.setAdapter(mAdapter);
+        if(lv != null){
+            lv.setAdapter(null);
+            lv.setAdapter(mAdapter);
+        }
     }
 
 

@@ -31,7 +31,7 @@ import com.example.mdp_android.bluetooth.BluetoothManager;
 
 import static com.example.mdp_android.bluetooth.BluetoothChatService.STATE_NONE;
 
-public class CommFragment extends Fragment {
+public class CommFragment extends Fragment implements MainActivity.CallbackFragment {
     private static final String TAG = "CommFragment";
     private EditText msgOut;
     private EditText fn1String, fn2String;
@@ -160,9 +160,12 @@ public class CommFragment extends Fragment {
         });
     }
 
-    public void update(int type, String msg) {
-        TextView msgIn = getView().findViewById(R.id.msgReceived);
-        msgIn.setText(msg+'\n'+msgIn.getText());
+    public void update(int type, String key, String msg){
+        if(key != null && key.equals("MDF")){
+            TextView msgIn = getView().findViewById(R.id.msgReceived);
+            Log.d("MDF", String.valueOf(msgIn.getText()));
+            msgIn.setText(msg+'\n'+msgIn.getText());
+        }
     }
 
     private void setupChat() {

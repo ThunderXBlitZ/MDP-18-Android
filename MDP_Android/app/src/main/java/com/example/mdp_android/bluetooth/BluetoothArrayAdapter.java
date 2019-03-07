@@ -49,7 +49,7 @@ public class BluetoothArrayAdapter<T> extends ArrayAdapter {
         if(status && BluetoothManager.getInstance().isConnected()) {
             currentDevice.setConnected(true);
             statusText.setText("Connected");
-            int color = (mContext.getResources().getColor(R.color.colorPrimary) & 0x88FFFFFF) | 0x40000000;
+            int color = mContext.getResources().getColor(R.color.colorPrimaryDark);
             statusText.setTextColor(color);
         } else {
             currentDevice.setConnected(false);
