@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mdp_android.bluetooth.BluetoothManager;
@@ -16,7 +17,11 @@ import com.example.mdp_android.bluetooth.BluetoothManager;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+
 public class Maze extends ViewGroup {
+    // fragment's view
+    private View _fragView;
+
     // maze constants
     private static final int MAZE_WIDTH = 15;
     private static final int MAZE_HEIGHT = 20;
@@ -32,13 +37,14 @@ public class Maze extends ViewGroup {
     private int _direction = Constants.NORTH;
     private int[] _startCoord = {0, 0};
     private int[] _endCoord = {0, 0};
-    private ArrayList<Integer[]> _waypointList = new ArrayList<Integer[]>();
+    private int[] _wpCoord = {-1, -1};
     private ArrayList<Integer[]> _arrowBlockList = new ArrayList<Integer[]>();
     private int[] _obstacleData = new int[MAZE_HEIGHT * MAZE_WIDTH];
     private int[] _exploreData = new int[MAZE_HEIGHT * MAZE_WIDTH];
 
     // managing input states
     private int _coordCount = -1;
+    private boolean _wpSet = false;
     private int _inputState = Constants.idleMode;
     private Boolean _exploreCompleted = false;
 
@@ -47,8 +53,9 @@ public class Maze extends ViewGroup {
      *
      * @param context
      */
-    public Maze(Context context) {
+    public Maze(Context context, View MazeFragView) {
         super(context);
+        _fragView = MazeFragView;
         _tileList = new ArrayList<MazeTile>(MAZE_WIDTH * MAZE_HEIGHT);
 
         // generate mazeTiles, save to arraylist
@@ -123,27 +130,28 @@ public class Maze extends ViewGroup {
         }
     }
 
-    public String getWaypointList() {
-        String result = "";
-        for (Integer[] a : _waypointList) {
-            if (result != "") result += ",";
-            result += a[0] + "," + a[1];
-        }
-        return result;
+    public boolean getWpSet(){
+        return _wpSet;
     }
 
-    public void clearWaypoints() {
-        _waypointList = new ArrayList<Integer[]>();
+    public void resetWp(){
+        _wpCoord[0] = -1; _wpCoord[1] = -1;
+        _wpSet = false;
+        renderMaze();
+    }
+
+    public void resetStartEnd(){
+        _coordCount = -1;
         renderMaze();
     }
 
     public void reset() {
         _obstacleData = _emptyArray.clone();
         _exploreData = _emptyArray.clone();
-        _waypointList = new ArrayList<Integer[]>();
         _arrowBlockList = new ArrayList<Integer[]>();
+        resetWp();
         _inputState = Constants.idleMode;
-        _coordCount = -1;
+        resetStartEnd();
         _exploreCompleted = false;
         _direction = Constants.NORTH;
         for (MazeTile i : _tileList) {
@@ -174,9 +182,11 @@ public class Maze extends ViewGroup {
         }
 
         // for explored data, algo requirement is to pad first and last 2 bits with 0s
+        // so we will drop
         if(!isObstacle) {
-            fullString = fullString.substring(2, mazeSize + 2);
+            fullString = fullString.substring(2, fullString.length() - 2);
             for (int j = 0; j < fullString.length(); j++) {
+                if(count >= mazeSize) break;
                 result[count] = Character.getNumericValue(fullString.charAt(j));
                 count++;
             }
@@ -189,7 +199,7 @@ public class Maze extends ViewGroup {
                 if(count >= mazeSize) break;
 
                 while (count < mazeSize-1 && _exploreData[count] == Constants.UNEXPLORED) count++;
-                Log.d("comms_round", String.valueOf(j)+" "+String.valueOf(myChar)+" "+String.valueOf(count));
+                // Log.d("comms_round", String.valueOf(j)+" "+String.valueOf(myChar)+" "+String.valueOf(count));
 
                 if(count >= mazeSize) break;
                 result[count] = myChar;
@@ -227,7 +237,8 @@ public class Maze extends ViewGroup {
         else return;
 
         Integer[] blockCoord = new Integer[3];
-        blockCoord[2] = type;
+        blockCoord[2] = _direction;
+
         if (_direction == Constants.NORTH) {
             blockCoord[0] = _botCoord[0];
             blockCoord[1] = _botCoord[1];
@@ -246,7 +257,18 @@ public class Maze extends ViewGroup {
             blockCoord[0] -= 1 + distBlock;
         }
         _arrowBlockList.add(blockCoord);
+        displayArrowBlockString(blockCoord[0], blockCoord[1], blockCoord[2]);
         renderMaze();
+    }
+
+    private void displayArrowBlockString(int x, int y, int dir){
+        // have to invert bot's dir to get direction arrow block is facing relative to start point
+        String blockDir = "";
+        if (dir == Constants.NORTH) blockDir = "SOUTH";
+        else if (dir == Constants.SOUTH) blockDir = "NORTH";
+        else if (dir == Constants.EAST) blockDir = "WEST";
+        else if (dir == Constants.WEST) blockDir = "EAST";
+        MainActivity.forceUpdate("Arrow Block detected at: x:"+x+" y:"+y+", facing: "+blockDir);
     }
 
     private View.OnClickListener _tileListener = new View.OnClickListener() {
@@ -277,7 +299,12 @@ public class Maze extends ViewGroup {
             _endCoord = correctSelectedTile(mazeTile.get_xPos(), mazeTile.get_yPos(), 0);
             _coordCount = 1;
             BluetoothManager.getInstance().sendMessage("END_POS", _endCoord[0] + "," + _endCoord[1]);
+
+            // clean up
+            setState(Constants.idleMode);
+            _fragView.findViewById(R.id.manualBtn).setEnabled(true);
         }
+        // displayArrowBlockString(0,1);
         renderMaze();
     }
 
@@ -287,13 +314,13 @@ public class Maze extends ViewGroup {
 
         // check that target tiles are not occupied by obstacle or arrow block
         for (MazeTile a : targetMazeTiles) {if (isObstacle(a)) return;}
-        Integer[] waypoint2 = {waypointCoord[0], waypointCoord[1]};
-
-        // lazy hack for one waypoint only
-        _waypointList = new ArrayList<Integer[]>();
-
-        _waypointList.add(waypoint2);
+        _wpCoord = waypointCoord;
+        _wpSet = true;
         renderMaze();
+
+        // clean up
+        setState(Constants.idleMode);
+        BluetoothManager.getInstance().sendMessage("WP", _wpCoord[0]+","+_wpCoord[1]);
     }
 
     private void handleManualInput(MazeTile mazeTile) {
@@ -317,9 +344,8 @@ public class Maze extends ViewGroup {
     }
 
     public void attemptMoveBot(int dir, MazeTile mazeTile) {
-        final Handler handler = new Handler();
         if (canMove(dir, mazeTile)) {
-            // amd only - amd bot does not rotate
+            // amd only. Note: amd bot does not rotate
             /*
             if(dir == Constants.NORTH) BluetoothManager.getInstance().sendMessage("MOVE", "F");
             if(dir == Constants.SOUTH) BluetoothManager.getInstance().sendMessage("MOVE", "B");
@@ -422,9 +448,8 @@ public class Maze extends ViewGroup {
     // To be called after every update to maze data
     private void renderMaze() {
         // unexplored
-       // _exploreData = parseHexCharToBinary("f8007000ff01fe03fc07f80ff01fe03800400000000000000000000000000000000000000003", false);
-       // _obstacleData = parseHexCharToBinary("0f0", true);
-
+       _exploreData = parseHexCharToBinary("f8007000ff01fe03fc07f80ff01fe03800400000000000000000000000000000000000000003", false);
+       _obstacleData = parseHexCharToBinary("0f0f", true);
         for (int i = 0; i < MAZE_HEIGHT * MAZE_WIDTH; i++) {
             if (_exploreData[i] == Constants.UNEXPLORED) {
                 _tileList.get(i).setState(Constants.UNEXPLORED);
@@ -445,11 +470,9 @@ public class Maze extends ViewGroup {
         }
 
         // set waypoint tiles
-        if (_waypointList.size() > 0) {
-            for (Integer[] a : _waypointList) {
-                ArrayList<MazeTile> targetTiles = getTargetTiles(a[0], a[1], 0);
-                setTile(targetTiles, Constants.WAYPOINT);
-            }
+        if (_wpSet) {
+            ArrayList<MazeTile> targetTiles = getTargetTiles(_wpCoord[0], _wpCoord[1], 0);
+            setTile(targetTiles, Constants.WAYPOINT);
         }
 
         // set new robot tiles & head
@@ -549,7 +572,6 @@ public class Maze extends ViewGroup {
 
 
     // just for converting directions from algo, "N/S/E/W" to our constants
-    // because I'm lazy
     private int convertDirStrToNum(String dir){
         int dirNum = 0;
         switch(dir){

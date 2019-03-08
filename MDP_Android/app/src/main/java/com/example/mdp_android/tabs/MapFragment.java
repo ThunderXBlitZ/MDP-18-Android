@@ -22,7 +22,6 @@ import com.example.mdp_android.bluetooth.BluetoothManager;
 import java.util.concurrent.TimeUnit;
 
 public class MapFragment extends Fragment implements MainActivity.CallbackFragment {
-    private static final String TAG = "MapFragment";
     private Maze maze;
     private Boolean _autoRefresh = false;
     private long _fastestTime = 0;
@@ -38,7 +37,6 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
 
         // maze
         setupMaze();
-        maze.setState(Constants.idleMode);
 
         // controls
         initializeButtons();
@@ -50,8 +48,9 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
      */
     private void setupMaze() {
         RelativeLayout mazeLayout = getView().findViewById(R.id.mazeLayout);
-        maze = new Maze(getActivity());
+        maze = new Maze(getActivity(), getView());
         mazeLayout.addView(maze);
+        // maze.setState(Constants.idleMode);
     }
 
     /**
@@ -73,12 +72,9 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.idleMode) {
+                    maze.resetStartEnd();
                     Toast.makeText(getActivity(), "Tap on tiles to set your start and end coordinates", Toast.LENGTH_SHORT).show();
                     maze.setState(Constants.coordinateMode);
-                } else if (maze.getState() == Constants.coordinateMode && maze.coordinatesSet()) {
-                    Toast.makeText(getActivity(), "Exiting coordinates mode...", Toast.LENGTH_SHORT).show();
-                    maze.setState(Constants.idleMode);
-                    getView().findViewById(R.id.manualBtn).setEnabled(true);
                 }
             }
         });
@@ -103,15 +99,12 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.idleMode /* && maze.isExploreCompleted()*/) {
-                    maze.clearWaypoints();
+                    maze.resetWp();
                     maze.setState(Constants.waypointMode);
                     Toast.makeText(getActivity(), "Tap on tiles to set any waypoints", Toast.LENGTH_SHORT).show();
-                }
-                // finished setting waypoints
-                else if (maze.getState() == Constants.waypointMode) {
+                } else if (maze.getState() == Constants.waypointMode){
                     maze.setState(Constants.idleMode);
-                    Toast.makeText(getActivity(), "Exiting waypoint mode...", Toast.LENGTH_SHORT).show();
-                    BluetoothManager.getInstance().sendMessage("WP", maze.getWaypointList());
+                    Toast.makeText(getActivity(), "Cancelling waypoints..", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -253,7 +246,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 if(key.equals("EXPLORED_DATA")){
                     maze.handleExplore(msg);
                 }
-                else if(key.equals("EXPLORE_DONE")){
+                else if(key.equals("EX_DONE")){
                     // update maze
                     maze.setExploreCompleted(true);
 
@@ -273,7 +266,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 } else if(key.equals("grid")){ // amd tool only
                     maze.handleAMDGrid(msg);
                 }
-                else if(key.equals("FASTEST_DONE")){
+                else if(key.equals("FP_DONE")){
                     // update time display
                     _fastestTime = System.nanoTime() - _fastestTime;
                     _fastestTime = TimeUnit.SECONDS.convert(_fastestTime, TimeUnit.SECONDS);
@@ -293,13 +286,16 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     tv.setText(msg);
                 } else if (key.equals("AU")) {
                     maze.handleArrowBlock(Constants.NORTH, msg);
-                } else if (key.equals("AD")) {
+                }
+                /*
+                else if (key.equals("AD")) {
                     maze.handleArrowBlock(Constants.SOUTH, msg);
                 } else if (key.equals("AR")) {
                     maze.handleArrowBlock(Constants.WEST, msg);
                 } else if (key.equals("AL")) {
                     maze.handleArrowBlock(Constants.EAST, msg);
                 }
+                */
                 break;
             case Constants.ACCEL: // received message
                 if(maze.getState() != Constants.manualMode) return;

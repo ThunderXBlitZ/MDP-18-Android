@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -93,6 +94,9 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        TextView msgReceived = getView().findViewById(R.id.msgReceived);
+        msgReceived.setMovementMethod(new ScrollingMovementMethod());
+
         //Variables
         msgOut = view.findViewById(R.id.editText);
         sendBtn = view.findViewById(R.id.sendMsgBtn);
@@ -158,13 +162,23 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
                 });
             }
         });
+
+        renderMsgs();
     }
 
+    // just display
     public void update(int type, String key, String msg){
-        if(key != null && key.equals("MDF")){
+        renderMsgs();
+    }
+
+    private void renderMsgs(){
+        if(getView() != null) {
             TextView msgIn = getView().findViewById(R.id.msgReceived);
-            Log.d("MDF", String.valueOf(msgIn.getText()));
-            msgIn.setText(msg+'\n'+msgIn.getText());
+            if(msgIn != null){
+                String text = "";
+                for (String a : MainActivity.msgHistory) text += a + "\n";
+                msgIn.setText(text);
+            }
         }
     }
 

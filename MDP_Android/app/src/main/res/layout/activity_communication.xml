@@ -112,6 +112,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:scrollbars="vertical"
         android:id="@+id/msgReceived"
         android:layout_width="481dp"
         android:layout_height="144dp"

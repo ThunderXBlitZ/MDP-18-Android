@@ -88,10 +88,10 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
                 break;
         }
 
-        if(!BluetoothManager.getInstance().bluetoothAvailable()){
+        if(!BluetoothManager.getInstance().bluetoothAvailable() && mAdapter != null){
             mAdapter.clear();
         }
-        if(mAdapter.getCount() == 0){
+        if(mAdapter != null && mAdapter.getCount() == 0){
             displayConnectedDevice();
         }
         refreshList();
@@ -126,10 +126,12 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
     }
 
     private void refreshList(){
-        ListView lv = (ListView)getView().findViewById(R.id.listView);
-        if(lv != null){
-            lv.setAdapter(null);
-            lv.setAdapter(mAdapter);
+        if (getView() != null) {
+            ListView lv = getView().findViewById(R.id.listView);
+            if(lv != null){
+                lv.setAdapter(null);
+                lv.setAdapter(mAdapter);
+            }
         }
     }
 

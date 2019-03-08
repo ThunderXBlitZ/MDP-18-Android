@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SectionPageAdapter mSectionPageAdapter;
     private PagerAdapter pagerAdapter;
 
-    private ArrayList<CallbackFragment> callbackFragList = new ArrayList<CallbackFragment>();
+    private static ArrayList<CallbackFragment> callbackFragList = new ArrayList<CallbackFragment>();
 
     // RPI sends complete buffers of strings, so we will split by ';', and store any leftover msgs
     // for the next msg
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor arg0, int arg1) {
     }
 
-    private boolean _accelReady = true;
+    private boolean _accelReady = false;
     final Handler handler = new Handler();
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -297,13 +297,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     /**
      * for passing messages/events from BluetoothManager
-     * @param type type of event: MESSAGE_STATE_CHANGE (bluetooth), MESSAGE_READ etc.
-     * @param key key of json or null if message is just a string
-     * @param msg json[key] or just the message string
      */
     public void notifyFragments(int type, String key, String msg){
+        if(key != null && key.equals("MDF")){
+            msgHistory.add(msg);
+        }
         for(CallbackFragment i:callbackFragList){
             i.update(type, key, msg);
         }
+    }
+
+    public static ArrayList<String> msgHistory = new ArrayList<String>();
+    public static void forceUpdate(String text){
+        msgHistory.add(text);
     }
 }
