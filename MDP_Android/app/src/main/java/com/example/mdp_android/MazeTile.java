@@ -100,10 +100,10 @@ public class MazeTile extends View {
     }
 
     public void setState(int newState){
-        if(newState != _state){
+        // if(newState != _state){
             _state = newState;
             invalidate();
-        }
+        // }
     }
 
     public int get_xPos(){

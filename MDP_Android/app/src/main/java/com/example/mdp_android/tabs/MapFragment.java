@@ -129,14 +129,14 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
         getView().findViewById(R.id.fastestBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (maze.getState() == Constants.idleMode && maze.isExploreCompleted()) {
+                // if (maze.getState() == Constants.idleMode && maze.isExploreCompleted()) {
                     Toast.makeText(getActivity(), "Sending robot on fastest path!", Toast.LENGTH_SHORT).show();
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Travelling Fastest Path...");
                     getView().findViewById(R.id.waypoint_button).setEnabled(false);
                     BluetoothManager.getInstance().sendMessage("FP_START", "");
                     maze.setState(Constants.fastestPathMode);
                     _fastestTime = System.nanoTime();
-                }
+               // }
             }
         });
 
@@ -144,12 +144,12 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
         getView().findViewById(R.id.resetBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (maze.getState() == Constants.idleMode) {
+               // if (maze.getState() == Constants.idleMode) {
                     Toast.makeText(getActivity(), "Maze reset!", Toast.LENGTH_SHORT).show();
                     BluetoothManager.getInstance().sendMessage("RESET", "");
                     maze.reset();
                     initializeButtons();
-                }
+                //}
             }
         });
 
@@ -232,7 +232,9 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
         getView().findViewById(R.id.calibrateBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BluetoothManager.getInstance().sendMessage("CALIBRATE", "");
+                if(maze.getState() == Constants.idleMode){
+                    BluetoothManager.getInstance().sendMessage("MOVE", "c");
+                }
             }
         });
     }
@@ -242,6 +244,9 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
     private String _mdfObstacle = "";
     /* Handle Bluetooth messages received */
     public void update(int type, String key, String msg) {
+        if(key != null) key = key.trim();
+        if(msg != null) msg = msg.trim();
+
         switch (type) {
             case Constants.MESSAGE_STATE_CHANGE: // bluetooth state change, not required actually
                 // Log.d("MESSAGE_STATE_CHANGE", msg);

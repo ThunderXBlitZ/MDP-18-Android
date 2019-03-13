@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 processedMsg = msgList[i];
                             }
                             String type = "";
-                            String value = processedMsg;
+                            String value = processedMsg.trim();
                             Log.d("comms_msgReceived", value);
                             if (value != null && value.contains("|")) {
                                 String[] tmp = value.split("\\|");

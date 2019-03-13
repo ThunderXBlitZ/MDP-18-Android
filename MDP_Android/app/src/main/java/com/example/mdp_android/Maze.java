@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 public class Maze extends ViewGroup {
     // maze constants
-    private static final int MAZE_WIDTH = 15;
-    private static final int MAZE_HEIGHT = 20;
+    private static final int MAZE_WIDTH = 8;
+    private static final int MAZE_HEIGHT = 11;
     public static int TILESIZE = 0;
     private final int[] _emptyArray = new int[MAZE_HEIGHT * MAZE_WIDTH];
 
@@ -88,7 +88,7 @@ public class Maze extends ViewGroup {
         // for explored data, algo requirement is to pad first and last 2 bits with 0s
         // so we will drop those
         String tmp = parseHexCharToBinary(binaryData);
-        _exploreData = convertStrToIntArray(tmp.substring(2, Math.max(tmp.length(), MAZE_HEIGHT * MAZE_WIDTH) - 2));
+        _exploreData = convertStrToIntArray(tmp.substring(2, Math.min(tmp.length(), MAZE_HEIGHT * MAZE_WIDTH) - 2));
         renderMaze();
     }
 
@@ -208,9 +208,9 @@ public class Maze extends ViewGroup {
         } catch (Exception e) {
             Log.e("arrowBlockPos", e.getMessage());
         }
-
-        if (arrowSize <= 10.3 && arrowSize >= 9.8) distBlock = 3;
-        else if (arrowSize >= 5.2 && arrowSize <= 6.7) distBlock = 2;
+;
+        if (arrowSize <= 7 && arrowSize >= 9.5) distBlock = 3;
+        else if (arrowSize >= 17 && arrowSize <= 20.5) distBlock = 2;
         else return;
 
         Integer[] blockCoord = new Integer[3];
@@ -434,7 +434,7 @@ public class Maze extends ViewGroup {
         // handleObstacle("041041041060c1e3f3");
 
         // unexplored
-        for (int i = 0; i < MAZE_HEIGHT * MAZE_WIDTH; i++) {
+        for (int i = 0; i < _exploreData.length; i++) {
             if (_exploreData[i] == Constants.UNEXPLORED) {
                 _tileList.get(i).setState(Constants.UNEXPLORED);
             } else {
@@ -474,7 +474,7 @@ public class Maze extends ViewGroup {
         }
 
         // obstacles
-        for (int i = 0; i < MAZE_HEIGHT * MAZE_WIDTH; i++) {
+        for (int i = 0; i < _obstacleData.length; i++) {
             if (_obstacleData[i] == 1) {
                 _tileList.get(i).setState(Constants.OBSTACLE);
             }
@@ -564,16 +564,16 @@ public class Maze extends ViewGroup {
     private int convertDirStrToNum(String dir) {
         int dirNum = 0;
         switch (dir) {
-            case "SOUTH":
+            case "S":
                 dirNum = Constants.SOUTH;
                 break;
-            case "EAST":
+            case "E":
                 dirNum = Constants.EAST;
                 break;
-            case "WEST":
+            case "W":
                 dirNum = Constants.WEST;
                 break;
-            case "NORTH":
+            case "N":
                 dirNum = Constants.NORTH;
                 break;
             default:
