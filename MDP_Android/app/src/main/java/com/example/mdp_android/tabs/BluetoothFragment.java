@@ -1,5 +1,6 @@
 package com.example.mdp_android.tabs;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -43,6 +45,7 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
+
         // bluetooth config
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -53,7 +56,7 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         getActivity().registerReceiver(nReceiver, filter);
 
-        Button button = (Button) view.findViewById(R.id.btn_discover);
+        Button button = view.findViewById(R.id.btn_discover);
         button.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -64,7 +67,7 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
         });
 
         mAdapter = new BluetoothArrayAdapter<DeviceDetails>(getActivity(), new ArrayList<DeviceDetails>());
-        ListView lv = (ListView) getView().findViewById(R.id.listView);
+        ListView lv = getView().findViewById(R.id.listView);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -83,9 +86,11 @@ public class BluetoothFragment extends Fragment implements MainActivity.Callback
     public void update(int type, String key, String msg){
         switch(type) {
             case Constants.MESSAGE_STATE_CHANGE:
-                TextView textView = getView().findViewById(R.id.bt_status_text_frag);
-                if(textView != null) textView.setText(msg);
-                break;
+                if(getView() != null){
+                    TextView textView = getView().findViewById(R.id.bt_status_text_frag);
+                    if(textView != null) textView.setText(msg);
+                    break;
+                }
         }
 
         if(!BluetoothManager.getInstance().bluetoothAvailable() && mAdapter != null){

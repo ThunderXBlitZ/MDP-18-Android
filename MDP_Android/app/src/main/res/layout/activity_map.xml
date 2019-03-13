@@ -102,7 +102,7 @@
         android:layout_marginStart="430dp"
         android:layout_marginLeft="430dp"
         android:layout_marginTop="800dp"
-        android:background="@color/darkGreen"
+        android:background="@color/darkBlue"
         android:text="Auto-Calibrate"
         android:textColor="@color/White"
         android:textSize="@dimen/btn_text_size"
@@ -226,7 +226,7 @@
         android:layout_marginTop="170dp"
         android:layout_marginEnd="50dp"
         android:layout_marginRight="50dp"
-        android:text="xxxx"
+        android:text="-----"
         android:textSize="@dimen/description_text_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -250,7 +250,7 @@
         android:layout_marginTop="240dp"
         android:layout_marginEnd="50dp"
         android:layout_marginRight="50dp"
-        android:text="xxxx"
+        android:text="-----"
         android:textSize="@dimen/description_text_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

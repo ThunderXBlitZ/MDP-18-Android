@@ -40,16 +40,16 @@
         app:tabTextColor="@android:color/white">
 
         <android.support.design.widget.TabItem
-            android:id="@+id/map"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/map" />
-
-        <android.support.design.widget.TabItem
             android:id="@+id/bluetooth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bluetooth" />
+
+        <android.support.design.widget.TabItem
+            android:id="@+id/map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/map" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/comm"

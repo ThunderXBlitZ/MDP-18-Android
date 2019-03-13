@@ -2,7 +2,8 @@
 <resources>
     <color name="colorPrimary">#2E2162</color>
     <color name="colorPrimaryDark">#1d1344</color>
-    <color name="darkGreen">#00574B</color>
+    <color name="darkBlue">#002f5e</color>
+    <color name="lightBlue">#00b0ff</color>
     <color name="colorAccent">#5A376C</color>
     <color name="purpleText">#6200EE</color>
     <color name="White">#FFFFFF</color>

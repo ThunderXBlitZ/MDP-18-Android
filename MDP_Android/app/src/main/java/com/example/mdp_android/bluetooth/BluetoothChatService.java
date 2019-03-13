@@ -298,7 +298,6 @@ public class BluetoothChatService {
             int counter = 0;
             int maxTries = 3;
             while (mState != STATE_CONNECTED && counter < maxTries) {
-                Log.i("Reconnect", "trying reconnect");
                 //safety checks
                 if (mConnectedDevice != null) {
                     // attempt to reconnect 3 times

@@ -44,49 +44,14 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
     private BluetoothAdapter mBluetoothAdapter = null;
     private SharedPreferences mPreference;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        // If BT is not on, request that it be enabled.
-        // setupChat() will then be called during onActivityResult
-        if (mChatService == null) {
-            setupChat();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mChatService != null) {
-            mChatService.stop();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // Performing this check in onResume() covers the case in which BT was
-        // not enabled during onStart(), so we were paused to enable it...
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        if (mChatService != null) {
-            // Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == STATE_NONE) {
-                // Start the Bluetooth chat services
-                mChatService.start();
-            }
-        }
-    }
-
     public View onCreateView(LayoutInflater inflater, ViewGroup container, @Nullable Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
-
         return inflater.inflate(R.layout.activity_communication, container, false);
     }
 
@@ -114,7 +79,7 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
         if (!(view instanceof EditText)) {
             view.setOnTouchListener(new View.OnTouchListener() {
                 public boolean onTouch(View v, MotionEvent event) {
-                    hideSoftKeyboard(getActivity());
+                    hideSoftKeyboard();
                     return false;
                 }
             });
@@ -127,7 +92,6 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
                 // Create a AlertDialog Builder.
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
 
-                // alertDialogBuilder.setTitle("Test");
                 alertDialogBuilder.setCancelable(true);
 
                 // Init popup dialog view and it's ui controls.
@@ -163,26 +127,6 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
             }
         });
 
-        renderMsgs();
-    }
-
-    // just display
-    public void update(int type, String key, String msg){
-        renderMsgs();
-    }
-
-    private void renderMsgs(){
-        if(getView() != null) {
-            TextView msgIn = getView().findViewById(R.id.msgReceived);
-            if(msgIn != null){
-                String text = "";
-                for (String a : MainActivity.msgHistory) text += a + "\n";
-                msgIn.setText(text);
-            }
-        }
-    }
-
-    private void setupChat() {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,12 +134,14 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
                 if (view != null) {
                     String message = msgOut.getText().toString();
                     if (BluetoothManager.getInstance().bluetoothAvailable() && BluetoothManager.getInstance().isConnected()) {
-                            BluetoothManager.getInstance().sendMessage("MDF", message);
-                            Toast.makeText(getActivity(), "Message Sent!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            BluetoothManager.getInstance().notConnectedMsg();
-                        }
+                        BluetoothManager.getInstance().sendMessage("F0", message);
+                        MainActivity.updateMsgHistory("[ Sent: "+message+" ]");
+                        // Toast.makeText(getActivity(), "Message Sent!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        BluetoothManager.getInstance().notConnectedMsg();
+                    }
                 }
+                displayRecMsg();
             }
         });
 
@@ -205,11 +151,13 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
             public void onClick(View v) {
                 String s1 = mPreference.getString("s1", null);
                 if (BluetoothManager.getInstance().bluetoothAvailable() && BluetoothManager.getInstance().isConnected() && s1 != null) {
-                    BluetoothManager.getInstance().sendMessage("MDF", s1);
-                    Toast.makeText(getActivity(), "F1's String Sent!", Toast.LENGTH_SHORT).show();
+                    BluetoothManager.getInstance().sendMessage("F1", s1);
+                    MainActivity.updateMsgHistory("[ Sent (F1): "+s1+" ]");
+                    // Toast.makeText(getActivity(), "F1's String Sent!", Toast.LENGTH_SHORT).show();
                 } else {
                     BluetoothManager.getInstance().notConnectedMsg();
                 }
+                displayRecMsg();
             }
         });
 
@@ -219,13 +167,36 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
             public void onClick(View v) {
                 String s2 = mPreference.getString("s2", null);
                 if (BluetoothManager.getInstance().bluetoothAvailable() && BluetoothManager.getInstance().isConnected() && s2 != null) {
-                    BluetoothManager.getInstance().sendMessage("MDF", s2);
-                    Toast.makeText(getActivity(), "F2's String Sent!", Toast.LENGTH_SHORT).show();
+                    BluetoothManager.getInstance().sendMessage("F2", s2);
+                    MainActivity.updateMsgHistory("[ Sent (F2): "+s2+" ]");
+                    // Toast.makeText(getActivity(), "F2's String Sent!", Toast.LENGTH_SHORT).show();
                 } else {
                     BluetoothManager.getInstance().notConnectedMsg();
                 }
+                displayRecMsg();
             }
         });
+
+        displayRecMsg();
+    }
+
+    // just display
+    public void update(int type, String key, String msg){
+        if(key != null && key.equals("REC")){
+            MainActivity.updateMsgHistory("Received: "+msg);
+        }
+        displayRecMsg();
+    }
+
+    private void displayRecMsg(){
+        if(getView() != null) {
+            TextView msgIn = getView().findViewById(R.id.msgReceived);
+            if(msgIn != null){
+                String text = "";
+                for (String a : MainActivity.getMsgHistory()) text += a + "\n";
+                msgIn.setText(text);
+            }
+        }
     }
 
     private void initPopupViewControls() {
@@ -249,9 +220,9 @@ public class CommFragment extends Fragment implements MainActivity.CallbackFragm
         fn2String.setText(mPreference.getString("s2", null));
     }
 
-    public static void hideSoftKeyboard(Activity activity) {
-        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    private void hideSoftKeyboard(){
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
     }
 }
 

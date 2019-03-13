@@ -8,18 +8,16 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.Log;
 import android.view.View;
 
 import java.util.HashMap;
-import java.util.Random;
 
 public class MazeTile extends View {
-    private static final int UNEXPLORED = Color.BLACK;
-    private static final int EXPLORED = Color.WHITE;
-    private static final int OBSTACLE = Color.RED;
+    private static int UNEXPLORED;
+    private static int EXPLORED;
+    private static int OBSTACLE;
     private static int START;
-    private static final int GOAL = 0xFF19a08e;
+    private static int GOAL;
     private static int WAYPOINT;
     private static int ROBOT_HEAD;
     private static int ROBOT_BODY;
@@ -35,10 +33,14 @@ public class MazeTile extends View {
         _yPos = YPos;
 
         if (colorMap == null){
+            UNEXPLORED = Color.BLACK;
+            EXPLORED = Color.WHITE;
+            OBSTACLE = 0xFF00574B;
             ROBOT_BODY = getResources().getColor(R.color.pink);
             ROBOT_HEAD = getResources().getColor(R.color.colorPrimaryDark);
-            START = getResources().getColor(R.color.darkGreen);
-            WAYPOINT = getResources().getColor(R.color.colorPrimary);
+            START = getResources().getColor(R.color.darkBlue);
+            WAYPOINT = 0xFF96deff;
+            GOAL = getResources().getColor(R.color.lightBlue);
 
             colorMap = new HashMap<Integer, Integer>();
             colorMap.put(Constants.UNEXPLORED, UNEXPLORED);
@@ -71,6 +73,8 @@ public class MazeTile extends View {
         }
         else if (_state >= Constants.NORTH && _state <= Constants.WEST){
             Bitmap bitmap = null;
+            bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.up_arrow_foreground);
+            /* only up arrows are tested
             switch (_state){
                 case Constants.NORTH:
                     bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.up_arrow_foreground);
@@ -86,6 +90,7 @@ public class MazeTile extends View {
                     bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.right_arrow_foreground);
                     break;
             }
+            */
             canvas.drawBitmap(bitmap, null, new RectF(0, 0, Maze.TILESIZE-Constants.tilePadding, Maze.TILESIZE-Constants.tilePadding), null);
         }
     }

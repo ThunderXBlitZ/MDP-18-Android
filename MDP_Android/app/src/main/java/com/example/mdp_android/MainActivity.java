@@ -25,6 +25,7 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -79,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                final InputMethodManager imm = (InputMethodManager)getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mViewPager.getWindowToken(), 0);
                 mViewPager.setCurrentItem(tab.getPosition());
             }
 
@@ -94,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        mViewPager.setCurrentItem(1);
 
         // Bluetooth
         mBluetoothMgr = new BluetoothManager(this, mHandler);
@@ -105,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, BluetoothManager.BT_REQUEST_CODE);
 
-        // MockRPI rpi = new MockRPI(this);
         SensorManager sensorManager=(SensorManager) getSystemService(SENSOR_SERVICE);
         sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
@@ -167,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
                         mBluetoothMgr.stop();
-                        // notifyFragments("Bluetooth", "off");
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
                         // do nothing
@@ -227,8 +230,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     byte[] readBuf = (byte[]) msg.obj;
                     String readMessage = new String(readBuf, 0, msg.arg1);
 
-                    // to remove
-                    Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
 
                     if(readMessage == null || readMessage == "") return;
                     else if(readMessage.contains(";")) {
@@ -288,7 +290,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         unregisterReceiver(mReceiver);
         mBluetoothMgr.stop();
     }
-    //end of class
 
     // for handling callbacks from BluetoothChatService to the Tab Fragments
     public interface CallbackFragment {
@@ -299,16 +300,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
      * for passing messages/events from BluetoothManager
      */
     public void notifyFragments(int type, String key, String msg){
+        /*
         if(key != null && key.equals("MDF")){
-            msgHistory.add(msg);
+            updateMsgHistory(msg);
         }
+        */
         for(CallbackFragment i:callbackFragList){
             i.update(type, key, msg);
         }
     }
 
-    public static ArrayList<String> msgHistory = new ArrayList<String>();
-    public static void forceUpdate(String text){
+    // leaderboard requirement
+    private static ArrayList<String> msgHistory = new ArrayList<String>();
+    public static void updateMsgHistory(String text){
         msgHistory.add(text);
+    }
+    public static ArrayList<String> getMsgHistory(){
+        return msgHistory;
     }
 }

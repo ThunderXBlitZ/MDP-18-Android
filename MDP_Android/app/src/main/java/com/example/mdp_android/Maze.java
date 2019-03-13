@@ -1,27 +1,16 @@
 package com.example.mdp_android;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.mdp_android.bluetooth.BluetoothManager;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
 public class Maze extends ViewGroup {
-    // fragment's view
-    private View _fragView;
-
     // maze constants
     private static final int MAZE_WIDTH = 15;
     private static final int MAZE_HEIGHT = 20;
@@ -53,9 +42,8 @@ public class Maze extends ViewGroup {
      *
      * @param context
      */
-    public Maze(Context context, View MazeFragView) {
+    public Maze(Context context) {
         super(context);
-        _fragView = MazeFragView;
         _tileList = new ArrayList<MazeTile>(MAZE_WIDTH * MAZE_HEIGHT);
 
         // generate mazeTiles, save to arraylist
@@ -69,7 +57,7 @@ public class Maze extends ViewGroup {
             }
         }
 
-        for (int k = 0; i < MAZE_WIDTH * MAZE_HEIGHT; i++) {
+        for (int k = 0; k < MAZE_WIDTH * MAZE_HEIGHT; k++) {
             _emptyArray[k] = Constants.UNEXPLORED;
         }
         reset();
@@ -95,52 +83,64 @@ public class Maze extends ViewGroup {
         _exploreCompleted = value;
     }
 
-    // binaryData is Maze Size 300/4 = 75 hex characters
     public void handleExplore(String binaryData) {
-        _exploreData = parseHexCharToBinary(binaryData, false);
+        // binaryData is Maze Size 300/4 = 75 hex characters
+        // for explored data, algo requirement is to pad first and last 2 bits with 0s
+        // so we will drop those
+        String tmp = parseHexCharToBinary(binaryData);
+        _exploreData = convertStrToIntArray(tmp.substring(2, Math.max(tmp.length(), MAZE_HEIGHT * MAZE_WIDTH) - 2));
         renderMaze();
     }
 
     public void handleObstacle(String binaryData) {
-        _obstacleData = parseHexCharToBinary(binaryData, true);
+        // obstacle data is mapped to EXPLORED tiles in _exploredData
+        String tmp = parseHexCharToBinary(binaryData);
+        int count = 0;
+        int mazeSize = _exploreData.length;
+        int[] result = _emptyArray.clone();
+        for (int j = 0; j < tmp.length(); j++) {
+            int myChar = Character.getNumericValue(tmp.charAt(j));
+            while (count < mazeSize && _exploreData[count] == Constants.UNEXPLORED) count++;
+            if(count >= mazeSize) break;
+            result[count] = myChar;
+            count++;
+        }
+        _obstacleData = result;
         renderMaze();
     }
 
     // amd tool only
     public void handleAMDGrid(String binaryData) {
-        _exploreData = parseHexCharToBinary("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", false);
-        _obstacleData = parseHexCharToBinary(binaryData, true);
+        _exploreData = convertStrToIntArray(parseHexCharToBinary("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+        _obstacleData = convertStrToIntArray(parseHexCharToBinary(binaryData));
         renderMaze();
     }
 
     public void updateBotPosDir(String data) {
         try {
-            String tmp[] = data.substring(1, data.length() - 1).split(",");
+            String tmp[] = data.split(",");
             if (tmp.length == 3) {
                 String dir = tmp[2];
-                int xPos = Integer.parseInt(tmp[0]);
-                int yPos = Integer.parseInt(tmp[1]);
-                _direction = convertDirStrToNum(dir) + 8;
+                int yPos = Integer.parseInt(tmp[0]);
+                int xPos = Integer.parseInt(tmp[1]);
+                _direction = convertDirStrToNum(dir);
                 _botCoord[0] = xPos;
                 _botCoord[1] = yPos;
                 renderMaze();
             }
-        } catch (Error e){
+        } catch (NumberFormatException e) {
             Log.e("robotPos", e.getMessage());
         }
     }
 
-    public boolean getWpSet(){
-        return _wpSet;
-    }
-
-    public void resetWp(){
-        _wpCoord[0] = -1; _wpCoord[1] = -1;
+    public void resetWp() {
+        _wpCoord[0] = -1;
+        _wpCoord[1] = -1;
         _wpSet = false;
         renderMaze();
     }
 
-    public void resetStartEnd(){
+    public void resetStartEnd() {
         _coordCount = -1;
         renderMaze();
     }
@@ -163,53 +163,30 @@ public class Maze extends ViewGroup {
     /**
      * Data from algo is 4 characters of 0/1 is converted to 1 hex char
      */
-    private int[] parseHexCharToBinary(String hexStr, boolean isObstacle) {
-        int mazeSize = MAZE_HEIGHT*MAZE_WIDTH;
-        int[] result = _emptyArray.clone();
-        int count = 0;
-
+    private String parseHexCharToBinary(String hexStr) {
         String fullString = "";
         for (int i = 0; i < hexStr.length(); i++) {
             String hexChar = Character.toString(hexStr.charAt(i));
             int hexValue = 0;
             try {
                 hexValue = Integer.parseInt(hexChar, 16);
-            } catch (Error e){
+            } catch (NumberFormatException e) {
                 Log.e("ParseHexChar", e.getMessage());
             }
             String binary = String.format("%4s", Integer.toString(hexValue, 2)).replace(' ', '0');
             fullString += binary;
         }
+        return fullString;
+    }
 
-        // for explored data, algo requirement is to pad first and last 2 bits with 0s
-        // so we will drop
-        if(!isObstacle) {
-            fullString = fullString.substring(2, fullString.length() - 2);
-            for (int j = 0; j < fullString.length(); j++) {
-                if(count >= mazeSize) break;
-                result[count] = Character.getNumericValue(fullString.charAt(j));
-                count++;
-            }
-        } else {
-            Log.d("comms_obstacle", fullString);
-            // obstacle data is mapped to explored data
-            for (int j = 0; j < fullString.length(); j++) {
-                int myChar = Character.getNumericValue(fullString.charAt(j));
-
-                if(count >= mazeSize) break;
-
-                while (count < mazeSize-1 && _exploreData[count] == Constants.UNEXPLORED) count++;
-                // Log.d("comms_round", String.valueOf(j)+" "+String.valueOf(myChar)+" "+String.valueOf(count));
-
-                if(count >= mazeSize) break;
-                result[count] = myChar;
-                count++;
-            }
+    private int[] convertStrToIntArray(String data) {
+        int[] result = new int[data.length()];
+        for (int j = 0; j < data.length(); j++) {
+            result[j] = Character.getNumericValue(data.charAt(j));
         }
         return result;
     }
 
-    /*
     private void printIntArrayAsString(int[] data){
         String tmp = "";
         for (int i=0; i < data.length; i++){
@@ -217,10 +194,10 @@ public class Maze extends ViewGroup {
         }
         Log.d("comms_result", tmp);
     }
-    */
+
 
     public void handleArrowBlock(int type, String arrowSizeStr) {
-        if(!coordinatesSet()) return;
+        if (!coordinatesSet()) return;
 
         int distBlock = 1;
         float arrowSize = 0;
@@ -232,7 +209,7 @@ public class Maze extends ViewGroup {
             Log.e("arrowBlockPos", e.getMessage());
         }
 
-        if(arrowSize <= 10.3 && arrowSize >= 9.8) distBlock = 3;
+        if (arrowSize <= 10.3 && arrowSize >= 9.8) distBlock = 3;
         else if (arrowSize >= 5.2 && arrowSize <= 6.7) distBlock = 2;
         else return;
 
@@ -256,19 +233,23 @@ public class Maze extends ViewGroup {
             blockCoord[1] = _botCoord[1];
             blockCoord[0] -= 1 + distBlock;
         }
+
+        Log.e("ArrowBlock", _botCoord[0] + " " + _botCoord[1]);
+        if (blockCoord[0] < 0 || blockCoord[0] >= MAZE_WIDTH || blockCoord[1] < 0 || blockCoord[1] >= MAZE_HEIGHT)
+            return;
         _arrowBlockList.add(blockCoord);
         displayArrowBlockString(blockCoord[0], blockCoord[1], blockCoord[2]);
         renderMaze();
     }
 
-    private void displayArrowBlockString(int x, int y, int dir){
-        // have to invert bot's dir to get direction arrow block is facing relative to start point
+    private void displayArrowBlockString(int x, int y, int dir) {
+        // invert bot's dir to get direction arrow block is facing relative to start point
         String blockDir = "";
-        if (dir == Constants.NORTH) blockDir = "SOUTH";
-        else if (dir == Constants.SOUTH) blockDir = "NORTH";
-        else if (dir == Constants.EAST) blockDir = "WEST";
-        else if (dir == Constants.WEST) blockDir = "EAST";
-        MainActivity.forceUpdate("Arrow Block detected at: x:"+x+" y:"+y+", facing: "+blockDir);
+        if (dir == Constants.NORTH) blockDir = "D";
+        else if (dir == Constants.SOUTH) blockDir = "U";
+        else if (dir == Constants.EAST) blockDir = "L";
+        else if (dir == Constants.WEST) blockDir = "R";
+        MainActivity.updateMsgHistory("Arrow Block detected at: x:" + x + " y:" + y + ", facing: " + blockDir);
     }
 
     private View.OnClickListener _tileListener = new View.OnClickListener() {
@@ -292,6 +273,7 @@ public class Maze extends ViewGroup {
             _startCoord = correctSelectedTile(mazeTile.get_xPos(), mazeTile.get_yPos(), 0);
             _botCoord = _startCoord.clone();
             _coordCount = 0;
+            _direction = Constants.NORTH;
             BluetoothManager.getInstance().sendMessage("START_POS", _startCoord[0] + "," + _startCoord[1]);
         }
         // set end coordinates
@@ -302,9 +284,7 @@ public class Maze extends ViewGroup {
 
             // clean up
             setState(Constants.idleMode);
-            _fragView.findViewById(R.id.manualBtn).setEnabled(true);
         }
-        // displayArrowBlockString(0,1);
         renderMaze();
     }
 
@@ -313,14 +293,16 @@ public class Maze extends ViewGroup {
         ArrayList<MazeTile> targetMazeTiles = getTargetTiles(waypointCoord[0], waypointCoord[1], 0);
 
         // check that target tiles are not occupied by obstacle or arrow block
-        for (MazeTile a : targetMazeTiles) {if (isObstacle(a)) return;}
+        for (MazeTile a : targetMazeTiles) {
+            if (isObstacle(a)) return;
+        }
         _wpCoord = waypointCoord;
         _wpSet = true;
         renderMaze();
+        BluetoothManager.getInstance().sendMessage("WP", _wpCoord[0] + "," + _wpCoord[1]);
 
         // clean up
         setState(Constants.idleMode);
-        BluetoothManager.getInstance().sendMessage("WP", _wpCoord[0]+","+_wpCoord[1]);
     }
 
     private void handleManualInput(MazeTile mazeTile) {
@@ -353,16 +335,16 @@ public class Maze extends ViewGroup {
             if(dir == Constants.WEST) BluetoothManager.getInstance().sendMessage("MOVE", "SL");
             */
 
-            if (dir != _direction){
-                int diff = _direction-dir;
-                if(Math.abs(diff) == 2){ // opposite direction
+            if (dir != _direction) {
+                int diff = _direction - dir;
+                if (Math.abs(diff) == 2) { // opposite direction
                     BluetoothManager.getInstance().sendMessage(null, "L");
                     BluetoothManager.getInstance().sendMessage(null, "L");
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
-                } else if(diff == 1 || dir == Constants.WEST && _direction == Constants.NORTH) {
+                } else if (diff == 1 || dir == Constants.WEST && _direction == Constants.NORTH) {
                     BluetoothManager.getInstance().sendMessage(null, "L");
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
-                } else if(diff == -1 || dir == Constants.NORTH && _direction == Constants.WEST) {
+                } else if (diff == -1 || dir == Constants.NORTH && _direction == Constants.WEST) {
                     BluetoothManager.getInstance().sendMessage(null, "R");
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating right...");
                 }
@@ -388,7 +370,7 @@ public class Maze extends ViewGroup {
                 newY -= 2;
             }
             // check if new spot for bot's head is within maze
-            if(newY < 0 || newY >= MAZE_HEIGHT || newX < 0 || newX >= MAZE_WIDTH){
+            if (newY < 0 || newY >= MAZE_HEIGHT || newX < 0 || newX >= MAZE_WIDTH) {
                 return false;
             }
         } else {
@@ -447,14 +429,15 @@ public class Maze extends ViewGroup {
 
     // To be called after every update to maze data
     private void renderMaze() {
+        // for testing
+        // handleExplore("ff007e00fc01f803f007e00fe01fc03f807f00f8004000000000000000000000000000000003");
+        // handleObstacle("041041041060c1e3f3");
+
         // unexplored
-       _exploreData = parseHexCharToBinary("f8007000ff01fe03fc07f80ff01fe03800400000000000000000000000000000000000000003", false);
-       _obstacleData = parseHexCharToBinary("0f0f", true);
         for (int i = 0; i < MAZE_HEIGHT * MAZE_WIDTH; i++) {
             if (_exploreData[i] == Constants.UNEXPLORED) {
                 _tileList.get(i).setState(Constants.UNEXPLORED);
-            }
-            else {
+            } else {
                 _tileList.get(i).setState(Constants.EXPLORED);
             }
         }
@@ -482,6 +465,12 @@ public class Maze extends ViewGroup {
             updateBotHead();
             ArrayList<MazeTile> headTile = getTargetTiles(_headCoord[0], _headCoord[1], 3);
             setTile(headTile, Constants.ROBOT_HEAD);
+            // for manual mode, update _exploredData array after moving
+            if (_inputState == Constants.manualMode) {
+                for (MazeTile a : botTiles) {
+                    _exploreData[a.get_xPos() + a.get_yPos() * MAZE_WIDTH] = Constants.EXPLORED;
+                }
+            }
         }
 
         // obstacles
@@ -546,7 +535,7 @@ public class Maze extends ViewGroup {
             } else if (mode == 3) {
                 _tempList.add(_tileList.get(_center));
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e("MissingTileIndex", e.getMessage());
         }
         return _tempList;
@@ -572,24 +561,24 @@ public class Maze extends ViewGroup {
 
 
     // just for converting directions from algo, "N/S/E/W" to our constants
-    private int convertDirStrToNum(String dir){
+    private int convertDirStrToNum(String dir) {
         int dirNum = 0;
-        switch(dir){
-            case "S":
+        switch (dir) {
+            case "SOUTH":
                 dirNum = Constants.SOUTH;
                 break;
-            case "E":
+            case "EAST":
                 dirNum = Constants.EAST;
                 break;
-            case "W":
+            case "WEST":
                 dirNum = Constants.WEST;
                 break;
-            case "N":
+            case "NORTH":
                 dirNum = Constants.NORTH;
                 break;
             default:
                 dirNum = Constants.NORTH;
-                Log.e("robotDir", "Unknown direction: "+dir);
+                Log.e("robotDir", "Unknown direction: " + dir);
                 break;
         }
         return dirNum;
@@ -606,12 +595,13 @@ public class Maze extends ViewGroup {
             TILESIZE = Math.min(width / MAZE_WIDTH, height / MAZE_HEIGHT);
         }
 
-        int i; int count = _tileList.size();
+        int i;
+        int count = _tileList.size();
         for (i = 0; i < count; i++) {
             int xPos = i % MAZE_WIDTH * TILESIZE;
             int yPos = (MAZE_HEIGHT - 1 - i / MAZE_WIDTH) * TILESIZE;
             _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);
-            _tileList.get(i).setPadding(Constants.tilePadding,Constants.tilePadding,Constants.tilePadding,Constants.tilePadding);
+            _tileList.get(i).setPadding(Constants.tilePadding, Constants.tilePadding, Constants.tilePadding, Constants.tilePadding);
         }
     }
 }

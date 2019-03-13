@@ -12,7 +12,7 @@ import android.widget.Toast;
 import com.example.mdp_android.Constants;
 
 /**
- * High-level Class that works on top of BlueChatService
+ * High-level class that abstracts BluetoothChatService
  */
 public class BluetoothManager {
     private BluetoothAdapter mBluetoothAdapter;
@@ -93,24 +93,6 @@ public class BluetoothManager {
             Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
         }
     }
-
-    /*
-    public void sendMessage(String type, String msg){
-        // if(mChatService != null && mChatService.getState() == BluetoothChatService.STATE_CONNECTED){
-            String toSend = msg;
-            Log.d("msgBeforeSent", msg);
-            if (type != null) toSend = type+'|'+msg;
-
-            // for testing only
-            MockRPI.getInstance().receivedEvent(toSend);
-
-            // restore this when finished testing API
-            // mChatService.write(toSend.getBytes());
-       // } else {
-        //    Toast.makeText(mActivity, "Bluetooth unavailable! Unable to send message.", Toast.LENGTH_SHORT);
-       // }
-    }
-    */
 
     public String getDeviceName(){
         return mChatService.getDeviceName();
