@@ -1,6 +1,7 @@
 package com.example.mdp_android;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,8 @@ import java.util.ArrayList;
 
 public class Maze extends ViewGroup {
     // maze constants
-    private static final int MAZE_WIDTH = 8;
-    private static final int MAZE_HEIGHT = 11;
+    private static final int MAZE_WIDTH = 15;
+    private static final int MAZE_HEIGHT = 20;
     public static int TILESIZE = 0;
     private final int[] _emptyArray = new int[MAZE_HEIGHT * MAZE_WIDTH];
 
@@ -88,7 +89,8 @@ public class Maze extends ViewGroup {
         // for explored data, algo requirement is to pad first and last 2 bits with 0s
         // so we will drop those
         String tmp = parseHexCharToBinary(binaryData);
-        _exploreData = convertStrToIntArray(tmp.substring(2, Math.min(tmp.length(), MAZE_HEIGHT * MAZE_WIDTH) - 2));
+        String tmp2 = tmp.substring(2, tmp.length()- 2);
+        _exploreData = convertStrToIntArray(tmp2);
         renderMaze();
     }
 
@@ -101,13 +103,48 @@ public class Maze extends ViewGroup {
         for (int j = 0; j < tmp.length(); j++) {
             int myChar = Character.getNumericValue(tmp.charAt(j));
             while (count < mazeSize && _exploreData[count] == Constants.UNEXPLORED) count++;
-            if(count >= mazeSize) break;
+            if (count >= mazeSize) break;
             result[count] = myChar;
             count++;
         }
         _obstacleData = result;
         renderMaze();
     }
+
+    // for returning during exploration, and fastest path
+    // update handle movement ourselves based on movement string received
+    // instead of receiving position and direction directly from algo
+    private Handler _botPosHandler = new Handler();
+    private int _botPosDelay = 1000;
+    private int _botStrCount = 0;
+    private String[] _botMoveStrArray;
+
+    public void handleBotData(String moveData) {
+        if (moveData != null && moveData != "" && moveData.contains("f")) {
+            _botMoveStrArray = moveData.replace("c", "").replace("f","f-").split("-");
+
+            _botPosHandler.postDelayed(new Runnable() {
+                public void run() {
+                        int newDir = _direction;
+                        String nextStep = _botMoveStrArray[_botStrCount];
+                            for (char ch : nextStep.toCharArray()) {
+                                if (ch == 'r' || ch == 'l') newDir = calcNewDir(newDir, ch);
+                                else if (ch == 'f' ) {
+                                    attemptMoveBot(newDir, false);
+                                }
+                            }
+                        _botStrCount++;
+                        if(_botStrCount<_botMoveStrArray.length){
+                            _botPosHandler.postDelayed(this,_botPosDelay);
+                        } else {
+                            _botStrCount = 0;
+                        }
+
+            }
+        },_botPosDelay);
+    }
+
+}
 
     // amd tool only
     public void handleAMDGrid(String binaryData) {
@@ -187,9 +224,9 @@ public class Maze extends ViewGroup {
         return result;
     }
 
-    private void printIntArrayAsString(int[] data){
+    private void printIntArrayAsString(int[] data) {
         String tmp = "";
-        for (int i=0; i < data.length; i++){
+        for (int i = 0; i < data.length; i++) {
             tmp += data[i];
         }
         Log.d("comms_result", tmp);
@@ -208,8 +245,7 @@ public class Maze extends ViewGroup {
         } catch (Exception e) {
             Log.e("arrowBlockPos", e.getMessage());
         }
-;
-        if (arrowSize <= 7 && arrowSize >= 9.5) distBlock = 3;
+        if (arrowSize >= 7 && arrowSize <= 9.5) distBlock = 3;
         else if (arrowSize >= 17 && arrowSize <= 20.5) distBlock = 2;
         else return;
 
@@ -237,6 +273,22 @@ public class Maze extends ViewGroup {
         Log.e("ArrowBlock", _botCoord[0] + " " + _botCoord[1]);
         if (blockCoord[0] < 0 || blockCoord[0] >= MAZE_WIDTH || blockCoord[1] < 0 || blockCoord[1] >= MAZE_HEIGHT)
             return;
+
+        // check if tile is already registered
+        // issue arrow block and the block infront/behind it get registered
+        // as we are not sure which msg comes first: bot update from algo or arrow block from rpi
+        // workaround: assume that the surrounding tiles around the first block registered are non-arrow blocks
+        ArrayList<MazeTile> b = getTargetTiles(blockCoord[0], blockCoord[1], 0);
+        if(b.size() > 0){
+            for (MazeTile c:b) {
+                if (c.getState() == Constants.NORTH) {
+                    return;
+                }
+            }
+        } else { // cannot find tiles
+            return;
+        }
+
         _arrowBlockList.add(blockCoord);
         displayArrowBlockString(blockCoord[0], blockCoord[1], blockCoord[2]);
         renderMaze();
@@ -308,24 +360,25 @@ public class Maze extends ViewGroup {
     private void handleManualInput(MazeTile mazeTile) {
         if (mazeTile.get_xPos() == _botCoord[0]) {
             if (mazeTile.get_yPos() == _botCoord[1] + 2) {
-                attemptMoveBot(Constants.NORTH, mazeTile);
+                attemptMoveBot(Constants.NORTH, mazeTile, true);
             } else if (mazeTile.get_yPos() == _botCoord[1] - 2) {
-                attemptMoveBot(Constants.SOUTH, mazeTile);
+                attemptMoveBot(Constants.SOUTH, mazeTile, true);
             }
         } else if (mazeTile.get_yPos() == _botCoord[1]) {
             if (mazeTile.get_xPos() == _botCoord[0] + 2) {
-                attemptMoveBot(Constants.EAST, mazeTile);
+                attemptMoveBot(Constants.EAST, mazeTile, true);
             } else if (mazeTile.get_xPos() == _botCoord[0] - 2) {
-                attemptMoveBot(Constants.WEST, mazeTile);
+                attemptMoveBot(Constants.WEST, mazeTile, true);
             }
         }
     }
 
-    public void attemptMoveBot(int dir) {
-        attemptMoveBot(dir, null);
+    // doMove is true only for manual mode. for updates from algo, doMove = false
+    public void attemptMoveBot(int dir, boolean doMove) {
+        attemptMoveBot(dir, null, doMove);
     }
 
-    public void attemptMoveBot(int dir, MazeTile mazeTile) {
+    public void attemptMoveBot(int dir, MazeTile mazeTile, boolean doMove) {
         if (canMove(dir, mazeTile)) {
             // amd only. Note: amd bot does not rotate
             /*
@@ -334,22 +387,23 @@ public class Maze extends ViewGroup {
             if(dir == Constants.EAST) BluetoothManager.getInstance().sendMessage("MOVE", "SR");
             if(dir == Constants.WEST) BluetoothManager.getInstance().sendMessage("MOVE", "SL");
             */
-
-            if (dir != _direction) {
-                int diff = _direction - dir;
-                if (Math.abs(diff) == 2) { // opposite direction
-                    BluetoothManager.getInstance().sendMessage(null, "L");
-                    BluetoothManager.getInstance().sendMessage(null, "L");
-                    BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
-                } else if (diff == 1 || dir == Constants.WEST && _direction == Constants.NORTH) {
-                    BluetoothManager.getInstance().sendMessage(null, "L");
-                    BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
-                } else if (diff == -1 || dir == Constants.NORTH && _direction == Constants.WEST) {
-                    BluetoothManager.getInstance().sendMessage(null, "R");
-                    BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating right...");
+            if (doMove) {
+                if (dir != _direction) {
+                    int diff = _direction - dir;
+                    if (Math.abs(diff) == 2) { // opposite direction
+                        BluetoothManager.getInstance().sendMessage(null, "L");
+                        BluetoothManager.getInstance().sendMessage(null, "L");
+                        BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
+                    } else if (diff == 1 || dir == Constants.WEST && _direction == Constants.NORTH) {
+                        BluetoothManager.getInstance().sendMessage(null, "L");
+                        BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating left...");
+                    } else if (diff == -1 || dir == Constants.NORTH && _direction == Constants.WEST) {
+                        BluetoothManager.getInstance().sendMessage(null, "R");
+                        BluetoothManager.getInstance().sendMessage("SET_STATUS", "Rotating right...");
+                    }
                 }
+                BluetoothManager.getInstance().sendMessage(null, "F");
             }
-            BluetoothManager.getInstance().sendMessage(null, "F");
             BluetoothManager.getInstance().sendMessage("SET_STATUS", "Moving forward...");
             moveBot(dir);
         }
@@ -385,11 +439,14 @@ public class Maze extends ViewGroup {
         } else {
             list = getTargetTiles(newX, newY, 2);
         }
+
+        /*
         for (MazeTile a : list) {
             if (isObstacle(a)) {
                 return false;
             }
         }
+        */
         return true;
     }
 
@@ -458,20 +515,7 @@ public class Maze extends ViewGroup {
             setTile(targetTiles, Constants.WAYPOINT);
         }
 
-        // set new robot tiles & head
-        if (_coordCount >= 0) {
-            ArrayList<MazeTile> botTiles = getTargetTiles(_botCoord[0], _botCoord[1], 0);
-            setTile(botTiles, Constants.ROBOT_BODY);
-            updateBotHead();
-            ArrayList<MazeTile> headTile = getTargetTiles(_headCoord[0], _headCoord[1], 3);
-            setTile(headTile, Constants.ROBOT_HEAD);
-            // for manual mode, update _exploredData array after moving
-            if (_inputState == Constants.manualMode) {
-                for (MazeTile a : botTiles) {
-                    _exploreData[a.get_xPos() + a.get_yPos() * MAZE_WIDTH] = Constants.EXPLORED;
-                }
-            }
-        }
+
 
         // obstacles
         for (int i = 0; i < _obstacleData.length; i++) {
@@ -486,6 +530,24 @@ public class Maze extends ViewGroup {
                 ArrayList<MazeTile> targetTiles = getTargetTiles(a[0], a[1], 3);
                 setTile(targetTiles, a[2]); // arrow direction
             }
+        }
+
+        // set new robot tiles & head
+        if (_coordCount >= 0) {
+            ArrayList<MazeTile> botTiles = getTargetTiles(_botCoord[0], _botCoord[1], 0);
+            setTile(botTiles, Constants.ROBOT_BODY);
+            updateBotHead();
+            ArrayList<MazeTile> headTile = getTargetTiles(_headCoord[0], _headCoord[1], 3);
+            setTile(headTile, Constants.ROBOT_HEAD);
+
+            /* leaves explored tiles where the bot was after reset
+            // for manual mode, update _exploredData array after moving
+            if (_inputState == Constants.manualMode) {
+                for (MazeTile a : botTiles) {
+                    _exploreData[a.get_xPos() + a.get_yPos() * MAZE_WIDTH] = Constants.EXPLORED;
+                }
+            }
+            */
         }
     }
 
@@ -603,5 +665,30 @@ public class Maze extends ViewGroup {
             _tileList.get(i).layout(xPos, yPos, xPos + TILESIZE, yPos + TILESIZE);
             _tileList.get(i).setPadding(Constants.tilePadding, Constants.tilePadding, Constants.tilePadding, Constants.tilePadding);
         }
+    }
+
+    // move = 'l'/'r'
+    private int calcNewDir(int _direction, char move) {
+        switch (_direction) {
+            case Constants.SOUTH:
+                if (move == 'l') return Constants.EAST;
+                else if (move == 'r') return Constants.WEST;
+                break;
+            case Constants.EAST:
+                if (move == 'l') return Constants.NORTH;
+                else if (move == 'r') return Constants.SOUTH;
+                break;
+            case Constants.WEST:
+                if (move == 'l') return Constants.SOUTH;
+                else if (move == 'r') return Constants.NORTH;
+                break;
+            case Constants.NORTH:
+                if (move == 'l') return Constants.WEST;
+                else if (move == 'r') return Constants.EAST;
+                break;
+            default:
+                return Constants.NORTH;
+        }
+        return Constants.NORTH;
     }
 }

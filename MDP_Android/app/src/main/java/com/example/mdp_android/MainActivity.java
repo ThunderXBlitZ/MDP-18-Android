@@ -252,21 +252,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             }
                             String type = "";
                             String value = processedMsg.trim();
-                            Log.d("comms_msgReceived", value);
+                            Log.d("comms_message", value);
                             if (value != null && value.contains("|")) {
                                 String[] tmp = value.split("\\|");
                                 if(tmp.length == 1){
-                                    // there should be no msgs w/o type in our system
+                                    // android will not receive no msgs w/o type in our system
                                     type = tmp[0] != "" ? tmp[0] : "";
                                     value = "";
                                 }
-                                else if(tmp.length == 2){
-                                    type = tmp[0] != "" ? tmp[0] : "";
+                                else if(tmp.length == 2){ // message contains both key and value
+
+                                    // issue: sometimes message becomes: "F    BOT"|3,3,S;
+                                    if (tmp[0].contains(" ")){
+                                        tmp[0] = tmp[0].replaceAll("\\s+", " ");
+                                        String [] abc = tmp[0].split(" ");
+                                        type = abc[abc.length-1];
+                                    } else {
+                                      type = tmp[0] != "" ? tmp[0] : "";
+                                    }
+
                                     value = tmp[1] != "" ? tmp[1] : "";
                                 }
                             }
-                            Log.d("comms_keyReceived", type);
-                            Log.d("comms_msgReceived", value);
+                            Log.d("comms2Key", type);
+                            Log.d("comms2Value", value);
                             notifyFragments(Constants.MESSAGE_READ, type,  value);
                         }
                     } else {

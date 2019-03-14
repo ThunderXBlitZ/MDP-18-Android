@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,13 +20,12 @@ import com.example.mdp_android.Maze;
 import com.example.mdp_android.R;
 import com.example.mdp_android.bluetooth.BluetoothManager;
 
-import java.util.concurrent.TimeUnit;
-
 public class MapFragment extends Fragment implements MainActivity.CallbackFragment {
     private Maze maze;
     private Boolean _autoRefresh = false;
     private long _fastestTime = 0;
     private long _exploreTime = 0;
+    private final Handler refreshHandler = new Handler();
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_map, container, false);
@@ -91,7 +89,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     getView().findViewById(R.id.coordBtn).setEnabled(false);
                     BluetoothManager.getInstance().sendMessage("EX_START", "");
                     maze.setState(Constants.exploreMode);
-                    _exploreTime = System.nanoTime();
+                    // _exploreTime = System.nanoTime();
                 }
             }
         });
@@ -135,7 +133,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     getView().findViewById(R.id.waypoint_button).setEnabled(false);
                     BluetoothManager.getInstance().sendMessage("FP_START", "");
                     maze.setState(Constants.fastestPathMode);
-                    _fastestTime = System.nanoTime();
+                    // _fastestTime = System.nanoTime();
                // }
             }
         });
@@ -158,7 +156,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    maze.attemptMoveBot(Constants.WEST);
+                    maze.attemptMoveBot(Constants.WEST, true);
                 }
             }
         });
@@ -167,7 +165,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    maze.attemptMoveBot(Constants.EAST);
+                    maze.attemptMoveBot(Constants.EAST, true);
                 }
             }
         });
@@ -176,7 +174,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    maze.attemptMoveBot(Constants.NORTH);
+                    maze.attemptMoveBot(Constants.NORTH, true);
                 }
             }
         });
@@ -185,7 +183,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if (maze.getState() == Constants.manualMode) {
-                    maze.attemptMoveBot(Constants.SOUTH);
+                    maze.attemptMoveBot(Constants.SOUTH, true);
                 }
             }
         });
@@ -215,16 +213,16 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 _autoRefresh = !_autoRefresh;
                 if(_autoRefresh){
                     Toast.makeText(getActivity(), "Auto Refresh on!", Toast.LENGTH_SHORT).show();
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable(){
-                        public void run(){
-                            BluetoothManager.getInstance().sendMessage("GET_DATA","");
-                            if(_autoRefresh) handler.postDelayed(this, 2000);
-                        }
-                    }, 2000);
-                } else {
-                    Toast.makeText(getActivity(), "Auto Refresh off!", Toast.LENGTH_SHORT).show();
-                }
+
+                refreshHandler.postDelayed(new Runnable(){
+                    public void run(){
+                        BluetoothManager.getInstance().sendMessage("GET_DATA","");
+                        if(_autoRefresh) refreshHandler.postDelayed(this, 2000);
+                    }
+                }, 2000);
+            } else {
+                Toast.makeText(getActivity(), "Auto Refresh off!", Toast.LENGTH_SHORT).show();
+            }
             }
         });
 
@@ -259,17 +257,19 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 else if(key.equals("EX_DONE")){
                     maze.setExploreCompleted(true);
 
-                    // record MDF strings
+                    // display most recent MDF strings
                     MainActivity.updateMsgHistory("MDF_Explore: "+_mdfExplore);
                     MainActivity.updateMsgHistory("MDF_Obstacle: "+_mdfObstacle);
 
                     // update time
+                    /*
                     _exploreTime = System.nanoTime() - _exploreTime;
                     int seconds = Math.round(_exploreTime/1000000000);
                     int minutes = seconds/60;
                     seconds = seconds - minutes*60;
                     TextView tv = getView().findViewById(R.id.explTime);
                     tv.setText(minutes+"min "+ seconds +"s");
+                    */
 
                     // update text
                     getView().findViewById(R.id.exploreBtn).setEnabled(false);
@@ -284,20 +284,27 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 }
                 else if(key.equals("FP_DONE")){
                     // update time display
+                    /*
                     _fastestTime = System.nanoTime() - _fastestTime;
                     int seconds = Math.round(_fastestTime/1000000000);
                     int minutes = seconds/60;
                     seconds = seconds - minutes*60;
                     TextView tv = getView().findViewById(R.id.fastestTime);
                     tv.setText(minutes+"min "+ seconds +"s");
+                    */
 
                     BluetoothManager.getInstance().sendMessage("SET_STATUS", "Fastest Path Completed!");
                     maze.setState(Constants.idleMode);
                     getView().findViewById(R.id.fastestBtn).setEnabled(false);
                     // Toast.makeText(getActivity(), "Fastest Path completed!", Toast.LENGTH_SHORT).show();
-                } else if (key.equals("BOT")){
+                }
+                else if (key.equals("BOT")){
                     maze.updateBotPosDir(msg);
-                } else if (key.equals("STATUS")){
+                }
+                else if(key.equals("MOVE")){
+                    maze.handleBotData(msg);
+                }
+                else if (key.equals("STATUS")){
                     TextView tv = getView().findViewById(R.id.statusText);
                     tv.setText(msg);
                 } else if (key.equals("AU")) {
@@ -319,13 +326,13 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                 int accelDir = Integer.parseInt(msg);
                 Log.i("accelReceived", msg);
                 if(accelDir == Constants.up){
-                    maze.attemptMoveBot(Constants.NORTH);
+                    maze.attemptMoveBot(Constants.NORTH, true);
                 } else if(accelDir == Constants.down){
-                    maze.attemptMoveBot(Constants.SOUTH);
+                    maze.attemptMoveBot(Constants.SOUTH, true);
                 } else if(accelDir == Constants.right){
-                    maze.attemptMoveBot(Constants.EAST);
+                    maze.attemptMoveBot(Constants.EAST, true);
                 } else if(accelDir == Constants.left){
-                    maze.attemptMoveBot(Constants.WEST);
+                    maze.attemptMoveBot(Constants.WEST, true);
                 }
         }
     }
