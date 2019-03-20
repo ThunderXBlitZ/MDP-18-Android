@@ -33,14 +33,14 @@ public class MazeTile extends View {
         _yPos = YPos;
 
         if (colorMap == null){
-            UNEXPLORED = Color.BLACK;
+            UNEXPLORED = 0xFFA9A9A9; // light grey 0xFFD3D3D3; // Color.GRAY;
             EXPLORED = Color.WHITE;
-            OBSTACLE = 0xFF00574B;
+            OBSTACLE = Color.BLACK;
             ROBOT_BODY = getResources().getColor(R.color.pink);
             ROBOT_HEAD = getResources().getColor(R.color.colorPrimaryDark);
-            START = getResources().getColor(R.color.darkBlue);
-            WAYPOINT = 0xFF96deff;
-            GOAL = getResources().getColor(R.color.lightBlue);
+            START = getResources().getColor(R.color.orange);
+            WAYPOINT = getResources().getColor(R.color.green); // 0xFF96deff;
+            GOAL = getResources().getColor(R.color.green);
 
             colorMap = new HashMap<Integer, Integer>();
             colorMap.put(Constants.UNEXPLORED, UNEXPLORED);

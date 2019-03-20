@@ -22,15 +22,18 @@ public class Maze extends ViewGroup {
     private ArrayList<MazeTile> _tileList;
 
     // maze data
-    private int[] _botCoord = {0, 0};
+    public int[] _botCoord = {0, 0};
     private int[] _headCoord = {0, 0};
     private int _direction = Constants.NORTH;
     private int[] _startCoord = {0, 0};
     private int[] _endCoord = {0, 0};
     private int[] _wpCoord = {-1, -1};
     private ArrayList<Integer[]> _arrowBlockList = new ArrayList<Integer[]>();
+    private ArrayList<Integer[]> _trueArrowBlockList = new ArrayList<Integer[]>();
     private int[] _obstacleData = new int[MAZE_HEIGHT * MAZE_WIDTH];
     private int[] _exploreData = new int[MAZE_HEIGHT * MAZE_WIDTH];
+
+    private ArrayList<Integer[]> _arrowBlockBanList = new ArrayList<Integer[]>();
 
     // managing input states
     private int _coordCount = -1;
@@ -61,7 +64,10 @@ public class Maze extends ViewGroup {
         for (int k = 0; k < MAZE_WIDTH * MAZE_HEIGHT; k++) {
             _emptyArray[k] = Constants.UNEXPLORED;
         }
+
         reset();
+        // handleCoordinatesInput(getTargetTiles(1,1,3).get(0));
+        // handleCoordinatesInput(getTargetTiles(13,18,3).get(0));
     }
 
     public int getState() {
@@ -89,9 +95,18 @@ public class Maze extends ViewGroup {
         // for explored data, algo requirement is to pad first and last 2 bits with 0s
         // so we will drop those
         String tmp = parseHexCharToBinary(binaryData);
-        String tmp2 = tmp.substring(2, tmp.length()- 2);
+        String tmp2 = tmp.substring(2, tmp.length() - 2);
         _exploreData = convertStrToIntArray(tmp2);
-        renderMaze();
+        // renderMaze();
+    }
+
+    private void addToTrueArrowBlockList(Integer [] val){
+        for (Integer[] a : _trueArrowBlockList) {
+            if (a[0] == val[0] && a[1] == val[1] && a[2] == val[2]) {
+                return;
+            }
+        }
+        _trueArrowBlockList.add(val);
     }
 
     public void handleObstacle(String binaryData) {
@@ -108,7 +123,79 @@ public class Maze extends ViewGroup {
             count++;
         }
         _obstacleData = result;
-        renderMaze();
+
+        // if arrow block on phantom block that was cleared, remove it
+        for (int k=0; k < _trueArrowBlockList.size(); k++){
+            Integer [] a = _trueArrowBlockList.get(k);
+            int index = a[0]+a[1]*MAZE_WIDTH;
+            if(index >= 0 && index < _obstacleData.length && _obstacleData[index] != 1){
+                _trueArrowBlockList.remove(k);
+            }
+        }
+
+        // iterate thru arrowblocklist, get true blocks and delete from arrowblocklist
+        for (int k=0; k < _arrowBlockList.size(); k++){
+            Integer [] a = _arrowBlockList.get(k);
+            int index = a[0]+a[1]*MAZE_WIDTH;
+            Log.d("iterating", a[0]+" "+a[1]+ " "+index);
+            // correct position
+            if(index > -1 && index < _obstacleData.length && _obstacleData[index] == 1){
+                addToTrueArrowBlockList(a);
+                Log.d("trueArrow", a[0]+ " "+a[1]);
+                _arrowBlockList.remove(k);
+                continue;
+            }
+            // bring forward
+                Integer [] before = a.clone();
+               switch(_direction){
+                   case Constants.NORTH:
+                       before[1] -= 1;
+                       break;
+                   case Constants.SOUTH:
+                       before[1] += 1;
+                       break;
+                   case Constants.EAST:
+                       before[0] -= 1;
+                       break;
+                   case Constants.WEST:
+                       before[0] += 1;
+                       break;
+               }
+                int index2 = before[0]+before[1]*MAZE_WIDTH;
+                Log.d("correcting", before[0]+" "+before[1]+ " "+index2);
+                if(index2 > -1 && index2 < _obstacleData.length && _obstacleData[index2] == 1){
+                    addToTrueArrowBlockList(before);;
+                    Log.d("trueCorrected", before[0]+ " "+before[1]);
+                    _arrowBlockList.remove(k);
+                    continue;
+                }
+            // push behind
+            Integer [] after = a.clone();
+            switch(_direction){
+                case Constants.NORTH:
+                    after[1] += 1;
+                    break;
+                case Constants.SOUTH:
+                    after[1] -= 1;
+                    break;
+                case Constants.EAST:
+                    after[0] += 1;
+                    break;
+                case Constants.WEST:
+                    after[0] -= 1;
+                    break;
+            }
+            int index3 = after[0]+after[1]*MAZE_WIDTH;
+            Log.d("correcting2", after[0]+" "+after[1]+ " "+index3);
+            if(index3 > -1 && index3 < _obstacleData.length && _obstacleData[index3] == 1){
+                addToTrueArrowBlockList(after);
+                Log.d("trueCorrected2", after[0]+ " "+after[1]);
+                _arrowBlockList.remove(k);
+                continue;
+            }
+        }
+
+        // renderMaze();
     }
 
     // for returning during exploration, and fastest path
@@ -121,30 +208,30 @@ public class Maze extends ViewGroup {
 
     public void handleBotData(String moveData) {
         if (moveData != null && moveData != "" && moveData.contains("f")) {
-            _botMoveStrArray = moveData.replace("c", "").replace("f","f-").split("-");
+            _botMoveStrArray = moveData.replace("c", "").replace("f", "f-").split("-");
 
             _botPosHandler.postDelayed(new Runnable() {
                 public void run() {
-                        int newDir = _direction;
-                        String nextStep = _botMoveStrArray[_botStrCount];
-                            for (char ch : nextStep.toCharArray()) {
-                                if (ch == 'r' || ch == 'l') newDir = calcNewDir(newDir, ch);
-                                else if (ch == 'f' ) {
-                                    attemptMoveBot(newDir, false);
-                                }
-                            }
-                        _botStrCount++;
-                        if(_botStrCount<_botMoveStrArray.length){
-                            _botPosHandler.postDelayed(this,_botPosDelay);
-                        } else {
-                            _botStrCount = 0;
+                    int newDir = _direction;
+                    String nextStep = _botMoveStrArray[_botStrCount];
+                    for (char ch : nextStep.toCharArray()) {
+                        if (ch == 'r' || ch == 'l') newDir = calcNewDir(newDir, ch);
+                        else if (ch == 'f') {
+                            attemptMoveBot(newDir, false);
                         }
+                    }
+                    _botStrCount++;
+                    if (_botStrCount < _botMoveStrArray.length) {
+                        _botPosHandler.postDelayed(this, _botPosDelay);
+                    } else {
+                        _botStrCount = 0;
+                    }
 
-            }
-        },_botPosDelay);
+                }
+            }, _botPosDelay);
+        }
+
     }
-
-}
 
     // amd tool only
     public void handleAMDGrid(String binaryData) {
@@ -186,6 +273,8 @@ public class Maze extends ViewGroup {
         _obstacleData = _emptyArray.clone();
         _exploreData = _emptyArray.clone();
         _arrowBlockList = new ArrayList<Integer[]>();
+        _trueArrowBlockList = new ArrayList<Integer[]>();
+        _arrowBlockBanList = new ArrayList<Integer[]>();
         resetWp();
         _inputState = Constants.idleMode;
         resetStartEnd();
@@ -195,6 +284,7 @@ public class Maze extends ViewGroup {
             i.reset();
         }
         renderMaze();
+        MainActivity.resetMsgHistory();
     }
 
     /**
@@ -233,75 +323,105 @@ public class Maze extends ViewGroup {
     }
 
 
-    public void handleArrowBlock(int type, String arrowSizeStr) {
-        if (!coordinatesSet()) return;
+    public void handleArrowBlock(int type, String data) {
+        if (coordinatesSet() && _inputState == Constants.exploreMode) {
 
-        int distBlock = 1;
-        float arrowSize = 0;
+            if (!data.contains(",")) return;
+            String[] tmp = data.split(",");
+            if (tmp.length != 2) return;
 
-        //from our experiments: rpi size: 4.7-> 2 block, 12 -> 3 blocks
-        try {
-            arrowSize = Float.valueOf(arrowSizeStr);
-        } catch (Exception e) {
-            Log.e("arrowBlockPos", e.getMessage());
-        }
-        if (arrowSize >= 7 && arrowSize <= 9.5) distBlock = 3;
-        else if (arrowSize >= 17 && arrowSize <= 20.5) distBlock = 2;
-        else return;
+            int blockDistL = 0;
+            int blockDistV = 0;
+            try {
+                blockDistL = Integer.parseInt(tmp[0]);
+                blockDistV = Integer.parseInt(tmp[1]);
+            } catch (Exception e) {
+                return;
+            }
 
-        Integer[] blockCoord = new Integer[3];
-        blockCoord[2] = _direction;
-
-        if (_direction == Constants.NORTH) {
+            Integer[] blockCoord = new Integer[3];
             blockCoord[0] = _botCoord[0];
             blockCoord[1] = _botCoord[1];
-            blockCoord[1] += 1 + distBlock;
-        } else if (_direction == Constants.SOUTH) {
-            blockCoord[0] = _botCoord[0];
-            blockCoord[1] = _botCoord[1];
-            blockCoord[1] -= 1 + distBlock;
-        } else if (_direction == Constants.EAST) {
-            blockCoord[0] = _botCoord[0];
-            blockCoord[1] = _botCoord[1];
-            blockCoord[0] += 1 + distBlock;
-        } else if (_direction == Constants.WEST) {
-            blockCoord[0] = _botCoord[0];
-            blockCoord[1] = _botCoord[1];
-            blockCoord[0] -= 1 + distBlock;
-        }
+            blockCoord[2] = _direction; // inverted later
+            Integer[] banCoord = new Integer[3];
+            Integer[] banCoord2 = new Integer[3];
+            banCoord[2] = blockCoord[2];
+            banCoord2[2] = blockCoord[2];
 
-        Log.e("ArrowBlock", _botCoord[0] + " " + _botCoord[1]);
-        if (blockCoord[0] < 0 || blockCoord[0] >= MAZE_WIDTH || blockCoord[1] < 0 || blockCoord[1] >= MAZE_HEIGHT)
-            return;
+            if (_direction == Constants.NORTH) {
+                blockCoord[0] += blockDistL - 2;
+                blockCoord[1] += 1 + blockDistV +1 ;
+                banCoord[0] = blockCoord[0];
+                banCoord[1] = blockCoord[1]+1;
+                banCoord2[0] = blockCoord[0];
+                banCoord2[1] = blockCoord[1]-1;
+            } else if (_direction == Constants.SOUTH) {
+                blockCoord[0] -= blockDistL - 2;
+                blockCoord[1] -= 1 + blockDistV+1;
+                banCoord[0] = blockCoord[0];
+                banCoord[1] = blockCoord[1]-1;
+                banCoord2[0] = blockCoord[0];
+                banCoord2[1] = blockCoord[1]+1;
+            } else if (_direction == Constants.EAST) {
+                blockCoord[0] += 1 + blockDistV+1;
+                blockCoord[1] -= blockDistL - 2;
+                banCoord[0] = blockCoord[0]+1;
+                banCoord[1] = blockCoord[1];
+                banCoord2[0] = blockCoord[0]-1;
+                banCoord2[1] = blockCoord[1];
+            } else if (_direction == Constants.WEST) {
+                blockCoord[0] -= 1 + blockDistV+1;
+                blockCoord[1] += blockDistL - 2;
+                banCoord[0] = blockCoord[0]-1;
+                banCoord[1] = blockCoord[1];
+                banCoord2[0] = blockCoord[0]+1;
+                banCoord2[1] = blockCoord[1];
+            }
 
-        // check if tile is already registered
-        // issue arrow block and the block infront/behind it get registered
-        // as we are not sure which msg comes first: bot update from algo or arrow block from rpi
-        // workaround: assume that the surrounding tiles around the first block registered are non-arrow blocks
-        ArrayList<MazeTile> b = getTargetTiles(blockCoord[0], blockCoord[1], 0);
-        if(b.size() > 0){
-            for (MazeTile c:b) {
-                if (c.getState() == Constants.NORTH) {
+
+            // outside maze: by right, we dont need this, but just in case
+            if (blockCoord[0] < 0 || blockCoord[0] >= MAZE_WIDTH || blockCoord[1] < 0 || blockCoord[1] >= MAZE_HEIGHT)
+                return;
+
+            // check unique
+            for (Integer[] a : _arrowBlockList) {
+                if (a[0] == blockCoord[0] && a[1] == blockCoord[1] && a[2] == blockCoord[2]) {
                     return;
                 }
             }
-        } else { // cannot find tiles
-            return;
-        }
 
-        _arrowBlockList.add(blockCoord);
-        displayArrowBlockString(blockCoord[0], blockCoord[1], blockCoord[2]);
-        renderMaze();
+            // if not in ban list, add
+            for (Integer[] a : _arrowBlockBanList) {
+                if (a[0] == blockCoord[0] && a[1] == blockCoord[1] && a[2] == blockCoord[2]) {
+                    return;
+                }
+            }
+
+            // if up/down/left/right, calc pos and add to ban list
+            Log.e("ArrowBlock@", blockCoord[0] + " " + blockCoord[1]);
+            _arrowBlockList.add(blockCoord);
+            _arrowBlockBanList.add(banCoord);
+            _arrowBlockBanList.add(banCoord2);
+
+            renderMaze();
+        }
     }
 
-    private void displayArrowBlockString(int x, int y, int dir) {
+    public void displayArrowBlockString() {
+        // change to true arrow block
+
         // invert bot's dir to get direction arrow block is facing relative to start point
-        String blockDir = "";
-        if (dir == Constants.NORTH) blockDir = "D";
-        else if (dir == Constants.SOUTH) blockDir = "U";
-        else if (dir == Constants.EAST) blockDir = "L";
-        else if (dir == Constants.WEST) blockDir = "R";
-        MainActivity.updateMsgHistory("Arrow Block detected at: x:" + x + " y:" + y + ", facing: " + blockDir);
+        for (Integer[] a : _trueArrowBlockList) {
+            int x = a[0];
+            int y = a[1];
+            int dir = a[2];
+            String blockDir = "";
+            if (dir == Constants.NORTH) blockDir = "D";
+            else if (dir == Constants.SOUTH) blockDir = "U";
+            else if (dir == Constants.EAST) blockDir = "L";
+            else if (dir == Constants.WEST) blockDir = "R";
+            MainActivity.updateMsgHistory("Arrow Block detected at: x:" + x + " y:" + y + ", facing: " + blockDir);
+        }
     }
 
     private View.OnClickListener _tileListener = new View.OnClickListener() {
@@ -516,7 +636,6 @@ public class Maze extends ViewGroup {
         }
 
 
-
         // obstacles
         for (int i = 0; i < _obstacleData.length; i++) {
             if (_obstacleData[i] == 1) {
@@ -525,8 +644,8 @@ public class Maze extends ViewGroup {
         }
 
         // arrow blocks
-        if (_arrowBlockList.size() > 0) {
-            for (Integer[] a : _arrowBlockList) {
+        if (_trueArrowBlockList.size() > 0) {
+            for (Integer[] a : _trueArrowBlockList) {
                 ArrayList<MazeTile> targetTiles = getTargetTiles(a[0], a[1], 3);
                 setTile(targetTiles, a[2]); // arrow direction
             }

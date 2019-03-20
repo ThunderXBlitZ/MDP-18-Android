@@ -263,10 +263,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 else if(tmp.length == 2){ // message contains both key and value
 
                                     // issue: sometimes message becomes: "F    BOT"|3,3,S;
-                                    if (tmp[0].contains(" ")){
+                                    if (tmp[0].contains("BOT")){
+                                        /* doesnt work
                                         tmp[0] = tmp[0].replaceAll("\\s+", " ");
                                         String [] abc = tmp[0].split(" ");
                                         type = abc[abc.length-1];
+                                        */
+                                        type = "BOT";
                                     } else {
                                       type = tmp[0] != "" ? tmp[0] : "";
                                     }
@@ -326,5 +329,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
     public static ArrayList<String> getMsgHistory(){
         return msgHistory;
+    }
+    public static void resetMsgHistory(){
+        msgHistory = new ArrayList<String>();
     }
 }

@@ -2,10 +2,11 @@
 <resources>
     <color name="colorPrimary">#2E2162</color>
     <color name="colorPrimaryDark">#1d1344</color>
-    <color name="darkBlue">#002f5e</color>
-    <color name="lightBlue">#00b0ff</color>
-    <color name="colorAccent">#5A376C</color>
-    <color name="purpleText">#6200EE</color>
+    <color name="orange">#F98470</color>
+    <color name="green">#A8BA51</color>
+    <color name="darkBlue">#111E6C</color>
+    <color name="colorAccent">#1d1344</color> <!--5A376C-->
+    <color name="purpleText">#1d1344</color>
     <color name="White">#FFFFFF</color>
     <color name="pink">#D24675</color>
 </resources>

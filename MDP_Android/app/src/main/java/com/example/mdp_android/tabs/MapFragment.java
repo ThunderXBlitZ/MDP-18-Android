@@ -260,7 +260,9 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     // display most recent MDF strings
                     MainActivity.updateMsgHistory("MDF_Explore: "+_mdfExplore);
                     MainActivity.updateMsgHistory("MDF_Obstacle: "+_mdfObstacle);
-
+                    Log.d("MDF_Explore: ",_mdfExplore);
+                    Log.d("MDF_Obstacle: ",_mdfObstacle);
+                    maze.displayArrowBlockString();
                     // update time
                     /*
                     _exploreTime = System.nanoTime() - _exploreTime;
@@ -308,6 +310,8 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
                     TextView tv = getView().findViewById(R.id.statusText);
                     tv.setText(msg);
                 } else if (key.equals("AU")) {
+                    Log.d("arrow",msg);
+                    Log.d("arrowBotPos",maze._botCoord[0]+" "+maze._botCoord[1]);
                     maze.handleArrowBlock(Constants.NORTH, msg);
                 }
                 /*
