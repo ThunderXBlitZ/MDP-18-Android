@@ -21,6 +21,7 @@ public class MazeTile extends View {
     private static int WAYPOINT;
     private static int ROBOT_HEAD;
     private static int ROBOT_BODY;
+    private static final int red = Color.RED;
     private static HashMap<Integer, Integer> colorMap = null;
 
     private int _state = Constants.UNEXPLORED; // controls tile's appearance
@@ -39,7 +40,7 @@ public class MazeTile extends View {
             ROBOT_BODY = getResources().getColor(R.color.pink);
             ROBOT_HEAD = getResources().getColor(R.color.colorPrimaryDark);
             START = getResources().getColor(R.color.orange);
-            WAYPOINT = getResources().getColor(R.color.green); // 0xFF96deff;
+            WAYPOINT = getResources().getColor(R.color.yellow); // 0xFF96deff;
             GOAL = getResources().getColor(R.color.green);
 
             colorMap = new HashMap<Integer, Integer>();
@@ -51,6 +52,7 @@ public class MazeTile extends View {
             colorMap.put(Constants.WAYPOINT, WAYPOINT);
             colorMap.put(Constants.ROBOT_HEAD, ROBOT_HEAD);
             colorMap.put(Constants.ROBOT_BODY, ROBOT_BODY);
+            colorMap.put(999, red);
         }
     }
 
@@ -65,12 +67,14 @@ public class MazeTile extends View {
         if(_state == Constants.NORTH) {
             return
         } */
-        if (_state >= Constants.UNEXPLORED && _state <= Constants.OBSTACLE) {
+        if (_state >= Constants.UNEXPLORED && _state <= Constants.OBSTACLE || _state ==999) {
             Rect rectangle = new Rect(0, 0, Maze.TILESIZE-Constants.tilePadding, Maze.TILESIZE-Constants.tilePadding);
             Paint paint = new Paint();
             paint.setColor(colorMap.get(_state));
             canvas.drawRect(rectangle, paint);
         }
+
+        // red
         else if (_state >= Constants.NORTH && _state <= Constants.WEST){
             Bitmap bitmap = null;
             bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.up_arrow_foreground);

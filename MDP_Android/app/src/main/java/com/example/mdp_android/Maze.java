@@ -106,6 +106,7 @@ public class Maze extends ViewGroup {
                 return;
             }
         }
+
         _trueArrowBlockList.add(val);
     }
 
@@ -124,27 +125,15 @@ public class Maze extends ViewGroup {
         }
         _obstacleData = result;
 
-        // if arrow block on phantom block that was cleared, remove it
-        for (int k=0; k < _trueArrowBlockList.size(); k++){
-            Integer [] a = _trueArrowBlockList.get(k);
-            int index = a[0]+a[1]*MAZE_WIDTH;
-            if(index >= 0 && index < _obstacleData.length && _obstacleData[index] != 1){
-                _trueArrowBlockList.remove(k);
-            }
-        }
+        // clear true arrowblock if phantom used to be here
+        clearIfPhantom();
 
         // iterate thru arrowblocklist, get true blocks and delete from arrowblocklist
-        for (int k=0; k < _arrowBlockList.size(); k++){
+        for (int k= _arrowBlockList.size()-1; k >= 0; k--){
             Integer [] a = _arrowBlockList.get(k);
             int index = a[0]+a[1]*MAZE_WIDTH;
             Log.d("iterating", a[0]+" "+a[1]+ " "+index);
-            // correct position
-            if(index > -1 && index < _obstacleData.length && _obstacleData[index] == 1){
-                addToTrueArrowBlockList(a);
-                Log.d("trueArrow", a[0]+ " "+a[1]);
-                _arrowBlockList.remove(k);
-                continue;
-            }
+
             // bring forward
                 Integer [] before = a.clone();
                switch(_direction){
@@ -161,14 +150,7 @@ public class Maze extends ViewGroup {
                        before[0] += 1;
                        break;
                }
-                int index2 = before[0]+before[1]*MAZE_WIDTH;
-                Log.d("correcting", before[0]+" "+before[1]+ " "+index2);
-                if(index2 > -1 && index2 < _obstacleData.length && _obstacleData[index2] == 1){
-                    addToTrueArrowBlockList(before);;
-                    Log.d("trueCorrected", before[0]+ " "+before[1]);
-                    _arrowBlockList.remove(k);
-                    continue;
-                }
+
             // push behind
             Integer [] after = a.clone();
             switch(_direction){
@@ -185,12 +167,39 @@ public class Maze extends ViewGroup {
                     after[0] -= 1;
                     break;
             }
+                int index2 = before[0]+before[1]*MAZE_WIDTH;
+                Log.d("correcting", before[0]+" "+before[1]+ " "+index2);
+                if(index2 > -1 && index2 < _obstacleData.length && _obstacleData[index2] == 1){
+                    addToTrueArrowBlockList(before);;
+                    Log.d("trueCorrected", before[0]+ " "+before[1]);
+                    _arrowBlockList.remove(k);
+                    _arrowBlockBanList.add(before);
+                    _arrowBlockBanList.add(a);
+                    _arrowBlockBanList.add(after);
+                    continue;
+                }
+
+            // correct position
+            if(index > -1 && index < _obstacleData.length && _obstacleData[index] == 1){
+                addToTrueArrowBlockList(a);
+                Log.d("trueArrow", a[0]+ " "+a[1]);
+                _arrowBlockList.remove(k);
+                _arrowBlockBanList.add(before);
+                _arrowBlockBanList.add(a);
+                _arrowBlockBanList.add(after);
+                continue;
+            }
+
+
             int index3 = after[0]+after[1]*MAZE_WIDTH;
             Log.d("correcting2", after[0]+" "+after[1]+ " "+index3);
             if(index3 > -1 && index3 < _obstacleData.length && _obstacleData[index3] == 1){
                 addToTrueArrowBlockList(after);
                 Log.d("trueCorrected2", after[0]+ " "+after[1]);
                 _arrowBlockList.remove(k);
+                _arrowBlockBanList.add(before);
+                _arrowBlockBanList.add(a);
+                _arrowBlockBanList.add(after);
                 continue;
             }
         }
@@ -202,33 +211,43 @@ public class Maze extends ViewGroup {
     // update handle movement ourselves based on movement string received
     // instead of receiving position and direction directly from algo
     private Handler _botPosHandler = new Handler();
-    private int _botPosDelay = 1000;
+    private int _botPosDelay = 500;
     private int _botStrCount = 0;
-    private String[] _botMoveStrArray;
+    private boolean _botHandlerRunning = false;
+    private ArrayList<String> _botMoveStrArray = new ArrayList<String>();
 
     public void handleBotData(String moveData) {
         if (moveData != null && moveData != "" && moveData.contains("f")) {
-            _botMoveStrArray = moveData.replace("c", "").replace("f", "f-").split("-");
+            String [] tmp = moveData.replace("c", "").replace("f", "f-").split("-");
 
-            _botPosHandler.postDelayed(new Runnable() {
-                public void run() {
-                    int newDir = _direction;
-                    String nextStep = _botMoveStrArray[_botStrCount];
-                    for (char ch : nextStep.toCharArray()) {
-                        if (ch == 'r' || ch == 'l') newDir = calcNewDir(newDir, ch);
-                        else if (ch == 'f') {
-                            attemptMoveBot(newDir, false);
+            for (String a:tmp){
+                _botMoveStrArray.add(a);
+            }
+
+            if(!_botHandlerRunning) {
+                _botHandlerRunning = true;
+                _botPosHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        int newDir = _direction;
+                        String nextStep = _botMoveStrArray.get(_botStrCount);
+                        for (char ch : nextStep.toCharArray()) {
+                            if (ch == 'r' || ch == 'l') newDir = calcNewDir(newDir, ch);
+                            else if (ch == 'f') {
+                                attemptMoveBot(newDir, false);
+                            }
                         }
-                    }
-                    _botStrCount++;
-                    if (_botStrCount < _botMoveStrArray.length) {
-                        _botPosHandler.postDelayed(this, _botPosDelay);
-                    } else {
-                        _botStrCount = 0;
-                    }
+                        _botStrCount++;
+                        if (_botStrCount < _botMoveStrArray.size()) {
+                            _botPosHandler.postDelayed(this, _botPosDelay);
+                        } else {
+                            _botHandlerRunning = false;
+                            _botStrCount = 0;
+                            _botMoveStrArray = new ArrayList<String>();
+                        }
 
-                }
-            }, _botPosDelay);
+                    }
+                }, _botPosDelay);
+            }
         }
 
     }
@@ -285,6 +304,7 @@ public class Maze extends ViewGroup {
         }
         renderMaze();
         MainActivity.resetMsgHistory();
+        _botMoveStrArray = new ArrayList<String>();
     }
 
     /**
@@ -322,9 +342,20 @@ public class Maze extends ViewGroup {
         Log.d("comms_result", tmp);
     }
 
+    private void clearIfPhantom(){
+        // if arrow block on phantom block that was cleared, remove it
+        for (int k=_trueArrowBlockList.size()-1; k >= 0; k--){
+            Integer [] a = _trueArrowBlockList.get(k);
+            int index = a[0]+a[1]*MAZE_WIDTH;
+            if(index >= 0 && index < _obstacleData.length && _obstacleData[index] != 1){
+                _trueArrowBlockList.remove(k);
+            }
+        }
+    }
 
     public void handleArrowBlock(int type, String data) {
-        if (coordinatesSet() && _inputState == Constants.exploreMode) {
+        clearIfPhantom();
+        if (coordinatesSet() /*&& _inputState == Constants.exploreMode*/) {
 
             if (!data.contains(",")) return;
             String[] tmp = data.split(",");
@@ -350,27 +381,27 @@ public class Maze extends ViewGroup {
 
             if (_direction == Constants.NORTH) {
                 blockCoord[0] += blockDistL - 2;
-                blockCoord[1] += 1 + blockDistV +1 ;
+                blockCoord[1] += blockDistV ; // originally + 2
                 banCoord[0] = blockCoord[0];
                 banCoord[1] = blockCoord[1]+1;
                 banCoord2[0] = blockCoord[0];
                 banCoord2[1] = blockCoord[1]-1;
             } else if (_direction == Constants.SOUTH) {
                 blockCoord[0] -= blockDistL - 2;
-                blockCoord[1] -= 1 + blockDistV+1;
+                blockCoord[1] -= blockDistV; // originally + 2
                 banCoord[0] = blockCoord[0];
                 banCoord[1] = blockCoord[1]-1;
                 banCoord2[0] = blockCoord[0];
                 banCoord2[1] = blockCoord[1]+1;
             } else if (_direction == Constants.EAST) {
-                blockCoord[0] += 1 + blockDistV+1;
+                blockCoord[0] += blockDistV; // originally + 2
                 blockCoord[1] -= blockDistL - 2;
                 banCoord[0] = blockCoord[0]+1;
                 banCoord[1] = blockCoord[1];
                 banCoord2[0] = blockCoord[0]-1;
                 banCoord2[1] = blockCoord[1];
             } else if (_direction == Constants.WEST) {
-                blockCoord[0] -= 1 + blockDistV+1;
+                blockCoord[0] -= blockDistV; // originally + 2
                 blockCoord[1] += blockDistL - 2;
                 banCoord[0] = blockCoord[0]-1;
                 banCoord[1] = blockCoord[1];
@@ -390,6 +421,7 @@ public class Maze extends ViewGroup {
                 }
             }
 
+
             // if not in ban list, add
             for (Integer[] a : _arrowBlockBanList) {
                 if (a[0] == blockCoord[0] && a[1] == blockCoord[1] && a[2] == blockCoord[2]) {
@@ -400,8 +432,9 @@ public class Maze extends ViewGroup {
             // if up/down/left/right, calc pos and add to ban list
             Log.e("ArrowBlock@", blockCoord[0] + " " + blockCoord[1]);
             _arrowBlockList.add(blockCoord);
-            _arrowBlockBanList.add(banCoord);
-            _arrowBlockBanList.add(banCoord2);
+            // _arrowBlockBanList.add(banCoord);
+            _arrowBlockBanList.add(blockCoord);
+            // _arrowBlockBanList.add(banCoord2);
 
             renderMaze();
         }
@@ -667,6 +700,14 @@ public class Maze extends ViewGroup {
                 }
             }
             */
+        }
+
+        // red
+        if (_arrowBlockList.size() > 0) {
+            for (Integer[] a : _arrowBlockList) {
+                ArrayList<MazeTile> targetTiles = getTargetTiles(a[0], a[1], 3);
+                setTile(targetTiles, 999); // arrow direction
+            }
         }
     }
 

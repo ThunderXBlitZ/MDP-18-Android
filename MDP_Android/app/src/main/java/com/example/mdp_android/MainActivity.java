@@ -232,6 +232,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                     // Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
 
+                    Log.d("comms_message", readMessage);
+
                     if(readMessage == null || readMessage == "") return;
                     else if(readMessage.contains(";")) {
                         String[] msgList = readMessage.split(";");
@@ -252,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             }
                             String type = "";
                             String value = processedMsg.trim();
-                            Log.d("comms_message", value);
+
                             if (value != null && value.contains("|")) {
                                 String[] tmp = value.split("\\|");
                                 if(tmp.length == 1){

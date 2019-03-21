@@ -231,7 +231,7 @@ public class MapFragment extends Fragment implements MainActivity.CallbackFragme
             @Override
             public void onClick(View v) {
                 if(maze.getState() == Constants.idleMode){
-                    BluetoothManager.getInstance().sendMessage("MOVE", "c");
+                    BluetoothManager.getInstance().sendMessage("MOVE", "rrcrcr");
                 }
             }
         });
