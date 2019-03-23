@@ -702,6 +702,7 @@ public class Maze extends ViewGroup {
             */
         }
 
+        /*
         // red
         if (_arrowBlockList.size() > 0) {
             for (Integer[] a : _arrowBlockList) {
@@ -709,6 +710,7 @@ public class Maze extends ViewGroup {
                 setTile(targetTiles, 999); // arrow direction
             }
         }
+        */
     }
 
     /* ====== helper functions ========= */

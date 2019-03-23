@@ -67,7 +67,7 @@ public class MazeTile extends View {
         if(_state == Constants.NORTH) {
             return
         } */
-        if (_state >= Constants.UNEXPLORED && _state <= Constants.OBSTACLE || _state ==999) {
+        if (_state >= Constants.UNEXPLORED && _state <= Constants.OBSTACLE /*|| _state ==999*/) {
             Rect rectangle = new Rect(0, 0, Maze.TILESIZE-Constants.tilePadding, Maze.TILESIZE-Constants.tilePadding);
             Paint paint = new Paint();
             paint.setColor(colorMap.get(_state));
