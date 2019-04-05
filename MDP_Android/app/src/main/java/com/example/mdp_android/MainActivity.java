@@ -23,10 +23,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import android.util.Log;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
@@ -34,12 +31,7 @@ import com.example.mdp_android.bluetooth.BluetoothChatService;
 import com.example.mdp_android.bluetooth.BluetoothManager;
 import com.example.mdp_android.tabs.SectionPageAdapter;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private BluetoothManager mBluetoothMgr;
@@ -220,19 +212,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     break;
                 case Constants.MESSAGE_WRITE:
                     // dont do anything
-                    /*
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-                    */
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     String readMessage = new String(readBuf, 0, msg.arg1);
-
-                    // Toast.makeText(MainActivity.this, "read: " + readMessage, Toast.LENGTH_SHORT).show();
-
-                    Log.d("comms_message", readMessage);
 
                     if(readMessage == null || readMessage == "") return;
                     else if(readMessage.contains(";")) {
@@ -266,11 +249,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                                     // issue: sometimes message becomes: "F    BOT"|3,3,S;
                                     if (tmp[0].contains("BOT")){
-                                        /* doesnt work
-                                        tmp[0] = tmp[0].replaceAll("\\s+", " ");
-                                        String [] abc = tmp[0].split(" ");
-                                        type = abc[abc.length-1];
-                                        */
                                         type = "BOT";
                                     } else {
                                       type = tmp[0] != "" ? tmp[0] : "";
@@ -279,8 +257,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                     value = tmp[1] != "" ? tmp[1] : "";
                                 }
                             }
-                            Log.d("comms2Key", type);
-                            Log.d("comms2Value", value);
                             notifyFragments(Constants.MESSAGE_READ, type,  value);
                         }
                     } else {
@@ -314,11 +290,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
      * for passing messages/events from BluetoothManager
      */
     public void notifyFragments(int type, String key, String msg){
-        /*
-        if(key != null && key.equals("MDF")){
-            updateMsgHistory(msg);
-        }
-        */
         for(CallbackFragment i:callbackFragList){
             i.update(type, key, msg);
         }

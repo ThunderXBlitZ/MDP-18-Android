@@ -132,7 +132,6 @@ public class Maze extends ViewGroup {
         for (int k= _arrowBlockList.size()-1; k >= 0; k--){
             Integer [] a = _arrowBlockList.get(k);
             int index = a[0]+a[1]*MAZE_WIDTH;
-            Log.d("iterating", a[0]+" "+a[1]+ " "+index);
 
             // bring forward
                 Integer [] before = a.clone();
@@ -168,10 +167,8 @@ public class Maze extends ViewGroup {
                     break;
             }
                 int index2 = before[0]+before[1]*MAZE_WIDTH;
-                Log.d("correcting", before[0]+" "+before[1]+ " "+index2);
                 if(index2 > -1 && index2 < _obstacleData.length && _obstacleData[index2] == 1){
-                    addToTrueArrowBlockList(before);;
-                    Log.d("trueCorrected", before[0]+ " "+before[1]);
+                    addToTrueArrowBlockList(before);
                     _arrowBlockList.remove(k);
                     _arrowBlockBanList.add(before);
                     _arrowBlockBanList.add(a);
@@ -182,7 +179,6 @@ public class Maze extends ViewGroup {
             // correct position
             if(index > -1 && index < _obstacleData.length && _obstacleData[index] == 1){
                 addToTrueArrowBlockList(a);
-                Log.d("trueArrow", a[0]+ " "+a[1]);
                 _arrowBlockList.remove(k);
                 _arrowBlockBanList.add(before);
                 _arrowBlockBanList.add(a);
@@ -192,10 +188,8 @@ public class Maze extends ViewGroup {
 
 
             int index3 = after[0]+after[1]*MAZE_WIDTH;
-            Log.d("correcting2", after[0]+" "+after[1]+ " "+index3);
             if(index3 > -1 && index3 < _obstacleData.length && _obstacleData[index3] == 1){
                 addToTrueArrowBlockList(after);
-                Log.d("trueCorrected2", after[0]+ " "+after[1]);
                 _arrowBlockList.remove(k);
                 _arrowBlockBanList.add(before);
                 _arrowBlockBanList.add(a);
@@ -203,8 +197,6 @@ public class Maze extends ViewGroup {
                 continue;
             }
         }
-
-        // renderMaze();
     }
 
     // for returning during exploration, and fastest path
@@ -339,7 +331,6 @@ public class Maze extends ViewGroup {
         for (int i = 0; i < data.length; i++) {
             tmp += data[i];
         }
-        Log.d("comms_result", tmp);
     }
 
     private void clearIfPhantom(){
@@ -375,40 +366,29 @@ public class Maze extends ViewGroup {
             blockCoord[1] = _botCoord[1];
             blockCoord[2] = _direction; // inverted later
             Integer[] banCoord = new Integer[3];
-            Integer[] banCoord2 = new Integer[3];
             banCoord[2] = blockCoord[2];
-            banCoord2[2] = blockCoord[2];
 
             if (_direction == Constants.NORTH) {
                 blockCoord[0] += blockDistL - 2;
                 blockCoord[1] += blockDistV ; // originally + 2
                 banCoord[0] = blockCoord[0];
                 banCoord[1] = blockCoord[1]+1;
-                banCoord2[0] = blockCoord[0];
-                banCoord2[1] = blockCoord[1]-1;
             } else if (_direction == Constants.SOUTH) {
                 blockCoord[0] -= blockDistL - 2;
                 blockCoord[1] -= blockDistV; // originally + 2
                 banCoord[0] = blockCoord[0];
                 banCoord[1] = blockCoord[1]-1;
-                banCoord2[0] = blockCoord[0];
-                banCoord2[1] = blockCoord[1]+1;
             } else if (_direction == Constants.EAST) {
                 blockCoord[0] += blockDistV; // originally + 2
                 blockCoord[1] -= blockDistL - 2;
                 banCoord[0] = blockCoord[0]+1;
                 banCoord[1] = blockCoord[1];
-                banCoord2[0] = blockCoord[0]-1;
-                banCoord2[1] = blockCoord[1];
             } else if (_direction == Constants.WEST) {
                 blockCoord[0] -= blockDistV; // originally + 2
                 blockCoord[1] += blockDistL - 2;
                 banCoord[0] = blockCoord[0]-1;
                 banCoord[1] = blockCoord[1];
-                banCoord2[0] = blockCoord[0]+1;
-                banCoord2[1] = blockCoord[1];
             }
-
 
             // outside maze: by right, we dont need this, but just in case
             if (blockCoord[0] < 0 || blockCoord[0] >= MAZE_WIDTH || blockCoord[1] < 0 || blockCoord[1] >= MAZE_HEIGHT)
@@ -429,20 +409,14 @@ public class Maze extends ViewGroup {
                 }
             }
 
-            // if up/down/left/right, calc pos and add to ban list
-            Log.e("ArrowBlock@", blockCoord[0] + " " + blockCoord[1]);
             _arrowBlockList.add(blockCoord);
-            // _arrowBlockBanList.add(banCoord);
             _arrowBlockBanList.add(blockCoord);
-            // _arrowBlockBanList.add(banCoord2);
 
             renderMaze();
         }
     }
 
     public void displayArrowBlockString() {
-        // change to true arrow block
-
         // invert bot's dir to get direction arrow block is facing relative to start point
         for (Integer[] a : _trueArrowBlockList) {
             int x = a[0];
@@ -533,13 +507,6 @@ public class Maze extends ViewGroup {
 
     public void attemptMoveBot(int dir, MazeTile mazeTile, boolean doMove) {
         if (canMove(dir, mazeTile)) {
-            // amd only. Note: amd bot does not rotate
-            /*
-            if(dir == Constants.NORTH) BluetoothManager.getInstance().sendMessage("MOVE", "F");
-            if(dir == Constants.SOUTH) BluetoothManager.getInstance().sendMessage("MOVE", "B");
-            if(dir == Constants.EAST) BluetoothManager.getInstance().sendMessage("MOVE", "SR");
-            if(dir == Constants.WEST) BluetoothManager.getInstance().sendMessage("MOVE", "SL");
-            */
             if (doMove) {
                 if (dir != _direction) {
                     int diff = _direction - dir;
@@ -585,21 +552,6 @@ public class Maze extends ViewGroup {
             newY = mazeTile.get_yPos();
         }
 
-        // get new maze tiles for bot head and check if obstacle
-        ArrayList<MazeTile> list;
-        if (dir == Constants.SOUTH || dir == Constants.NORTH) {
-            list = getTargetTiles(newX, newY, 1);
-        } else {
-            list = getTargetTiles(newX, newY, 2);
-        }
-
-        /*
-        for (MazeTile a : list) {
-            if (isObstacle(a)) {
-                return false;
-            }
-        }
-        */
         return true;
     }
 
@@ -693,6 +645,7 @@ public class Maze extends ViewGroup {
             setTile(headTile, Constants.ROBOT_HEAD);
 
             /* leaves explored tiles where the bot was after reset
+            // buggy
             // for manual mode, update _exploredData array after moving
             if (_inputState == Constants.manualMode) {
                 for (MazeTile a : botTiles) {
@@ -703,7 +656,7 @@ public class Maze extends ViewGroup {
         }
 
         /*
-        // red
+        // plot red tiles for original arrow readings
         if (_arrowBlockList.size() > 0) {
             for (Integer[] a : _arrowBlockList) {
                 ArrayList<MazeTile> targetTiles = getTargetTiles(a[0], a[1], 3);
